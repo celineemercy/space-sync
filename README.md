@@ -41,6 +41,67 @@ Reservation confirmed
 QR check-in (later development phase)
 ```
 
+## Ruang Lingkup Proyek (12 Pertemuan)
+
+Bagian ini menetapkan ruang lingkup CampusSpace yang realistis untuk dikerjakan selama 12 pertemuan. Fokus pengembangan adalah alur utama pencarian ruang dan reservasi; fitur lanjutan tetap menjadi rencana pengembangan setelah MVP selesai.
+
+### Deskripsi Masalah
+
+Mahasiswa sering kesulitan mengetahui ruang kampus yang tersedia dan sesuai untuk belajar atau melakukan kegiatan kelompok pada waktu tertentu. Informasi ruang, kapasitas, fasilitas, dan jadwal penggunaan dapat tersebar di beberapa sumber sehingga mahasiswa perlu mencari dan mencocokkannya secara manual. CampusSpace dirancang untuk menyatukan informasi tersebut dan menyediakan proses reservasi yang memeriksa benturan jadwal.
+
+### Profil Target Pengguna
+
+Target pengguna utama CampusSpace adalah mahasiswa yang membutuhkan ruang kampus untuk belajar mandiri, diskusi kelompok, rapat organisasi, atau kegiatan akademik lainnya. Pengguna diasumsikan memiliki perangkat Android, akun yang dapat digunakan untuk masuk, serta akses internet untuk mencari ketersediaan dan membuat reservasi.
+
+### Manfaat Aplikasi
+
+- Mempermudah mahasiswa menemukan ruang yang sesuai tanpa memeriksa banyak sumber informasi.
+- Menampilkan ketersediaan ruang berdasarkan tanggal dan waktu yang dipilih.
+- Membantu pengguna memilih ruang berdasarkan kapasitas dan fasilitas yang dibutuhkan.
+- Mengurangi risiko reservasi ganda melalui validasi jadwal pada backend.
+- Menyediakan satu tempat untuk melihat dan mengelola reservasi milik pengguna.
+
+### Daftar Fitur Inti
+
+Fitur berikut menjadi target MVP selama 12 pertemuan:
+
+- Autentikasi pengguna dasar.
+- Daftar ruang dan detail ruang.
+- Pemilihan tanggal serta rentang waktu.
+- Pencarian ketersediaan yang mempertimbangkan jadwal kelas dan reservasi yang sudah ada.
+- Filter berdasarkan kapasitas dan fasilitas.
+- Pembuatan reservasi dengan validasi konflik pada backend.
+- Halaman **My Reservations** untuk melihat reservasi pengguna.
+- Pembatalan reservasi.
+- Penyimpanan lokal untuk data penting dan penanganan dasar ketika jaringan bermasalah.
+
+### Fitur yang Tidak Dikerjakan
+
+Fitur berikut tidak termasuk dalam target 12 pertemuan dan hanya menjadi rencana pengembangan lanjutan:
+
+- Check-in menggunakan QR code.
+- Pelepasan reservasi otomatis ketika pengguna tidak hadir.
+- Pembaruan ketersediaan ruang secara real-time.
+- Push notification.
+- Pengelolaan status pemeliharaan atau pemblokiran ruang melalui aplikasi admin.
+- Riwayat penggunaan ruang dan analitik.
+- Rekomendasi ruang cerdas.
+- Integrasi dengan sistem akademik kampus yang sebenarnya.
+- Rilis produksi untuk iOS atau publikasi ke app store.
+
+### Kriteria Aplikasi Dinyatakan Berhasil
+
+MVP CampusSpace dinyatakan berhasil apabila skenario berikut dapat didemonstrasikan pada perangkat Android atau emulator:
+
+1. Pengguna dapat masuk ke aplikasi dan melihat daftar serta detail ruang.
+2. Pengguna dapat memilih tanggal dan waktu, lalu memfilter ruang berdasarkan kapasitas atau fasilitas.
+3. Sistem hanya menampilkan ruang yang tidak memiliki benturan dengan jadwal kelas atau reservasi lain pada waktu yang dipilih.
+4. Reservasi yang valid dapat disimpan dan ditampilkan pada halaman **My Reservations**.
+5. Backend menolak reservasi yang waktunya bertabrakan untuk ruang yang sama.
+6. Pengguna dapat membatalkan reservasi miliknya dan status ketersediaan diperbarui dengan benar.
+7. Aplikasi menangani kegagalan jaringan secara wajar tanpa berhenti secara tiba-tiba serta dapat menggunakan data penting yang telah disimpan secara lokal.
+8. Alur utama—masuk, mencari ruang, membuat reservasi, melihat reservasi, dan membatalkan reservasi—dapat diselesaikan tanpa kesalahan yang menghalangi pengguna.
+
 ## Key Features
 
 All features below are currently planned; implementation has not started.
