@@ -4,7 +4,7 @@
 
 ## Overview
 
-CampusSpace is a planned cross-platform mobile application designed to help students:
+CampusSpace is an Android-focused mobile application designed to help students:
 
 - Find campus rooms.
 - Check room availability for a selected date and time.
@@ -104,7 +104,7 @@ MVP CampusSpace dinyatakan berhasil apabila skenario berikut dapat didemonstrasi
 
 ## Key Features
 
-All features below are currently planned; implementation has not started.
+The MVP features below are implemented on the `dev` branch and are being prepared for Android device acceptance testing.
 
 ### Core / MVP
 
@@ -145,9 +145,7 @@ CampusSpace is intended to address several practical engineering problems:
 
 ## Tech Stack
 
-The following stack is planned and has not yet been added to the repository.
-
-| Area | Planned technologies |
+| Area | Technologies |
 | --- | --- |
 | Mobile | React Native, Expo, TypeScript |
 | Backend | NestJS, TypeScript, Prisma |
@@ -156,7 +154,7 @@ The following stack is planned and has not yet been added to the repository.
 
 ## Architecture
 
-The planned architecture separates the mobile client, local cache, backend API, and primary database:
+The architecture separates the mobile client, local cache, backend API, and primary database:
 
 ```mermaid
 flowchart LR
@@ -186,9 +184,9 @@ This rule detects partial overlaps, reservations contained within another reserv
 
 The mobile client may perform an early availability check for a responsive user experience, but the final conflict validation must happen on the backend. Server-side validation is necessary because availability can change between the initial search and reservation submission.
 
-## Planned Database Entities
+## Database Entities
 
-The initial domain model is expected to include:
+The implemented MVP domain model includes:
 
 - `User`
 - `Room`
@@ -196,21 +194,21 @@ The initial domain model is expected to include:
 - `RoomFacility`
 - `ClassSchedule`
 - `Reservation`
-- `CheckIn`
-- `RoomBlock`
-- `Notification`
 
-These entities are conceptual and may evolve as requirements and reservation rules are refined.
+`CheckIn`, `RoomBlock`, and `Notification` remain outside the MVP.
+
+These entities may evolve as requirements and reservation rules are refined.
 
 ## Project Structure
 
-The repository is currently empty except for this README. The planned monorepo structure is:
+The repository uses this lightweight monorepo structure:
 
 ```text
 campus-space/
-├── mobile/
-├── server/
-├── docs/
+├── mobile/                 # Expo / React Native Android client
+├── server/                 # NestJS API, Prisma schema, migrations, seed
+├── docs/                   # Architecture, ADRs, plans, testing guide
+├── docker-compose.yml      # Local PostgreSQL and API
 └── README.md
 ```
 
@@ -244,7 +242,9 @@ Through this project, I aim to learn and practise:
 
 This project is currently under active development as part of a university mobile programming course.
 
-The application is in the planning stage and is not production-ready.
+The MVP application, API, database migration, seed data, Docker environment, and automated checks are implemented. Local API integration and concurrent-booking protection have been verified. A hosted HTTPS API, EAS project linkage, signed APK build, and physical-device acceptance test still require the project owner's deployment and Expo accounts, so the project is not yet production-ready.
+
+For local setup and Android testing, see [`docs/testing-guide.md`](docs/testing-guide.md). For the remaining route to an installable APK, see [`docs/implementation-plan.md`](docs/implementation-plan.md).
 
 ## Author
 
