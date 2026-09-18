@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Environment files (examples stay tracked)
+.env
+.env.*
+!.env.example
+
+# Expo / React Native
+.expo/
+.expo-shared/
+web-build/
+mobile/android/
+mobile/ios/
+
+# Build and test output
+dist/
+build/
+coverage/
+*.tsbuildinfo
+*.apk
+*.aab
+
+# Android signing material
+*.jks
+*.keystore
+*.p12
+*.pem
+
+# Logs and local tooling
+*.log
+.cache/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Prisma generated client
+server/src/generated/prisma/
