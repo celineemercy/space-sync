@@ -32,6 +32,7 @@ coverage/
 .cache/
 .idea/
 .vscode/
+.claude/
 .DS_Store
 Thumbs.db
 
