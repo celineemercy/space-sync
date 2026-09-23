@@ -46,6 +46,8 @@ services:
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
       CAMPUS_TIMEZONE: ${CAMPUS_TIMEZONE:-Asia/Jakarta}
       CORS_ORIGIN: ${CORS_ORIGIN:-}
+      SEED_DEMO_EMAIL: ${SEED_DEMO_EMAIL:-student@example.test}
+      SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-}
     expose:
       - "3000"
     depends_on:
