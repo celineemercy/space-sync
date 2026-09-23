@@ -5,6 +5,8 @@ node_modules/
 .env
 .env.*
 !.env.example
+deploy/.env.vps
+deploy/backups/
 
 # Expo / React Native
 .expo/
