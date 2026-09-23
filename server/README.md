@@ -46,3 +46,7 @@ npm run build
 ```
 
 Never commit `.env`, database credentials, JWT secrets, demo passwords, or production seed data.
+
+## VPS deployment
+
+Production hosting uses `deploy/docker-compose.vps.yml` with private PostgreSQL/API networks and Caddy-managed HTTPS. Follow `../docs/vps-deployment.md`; do not publish port 3000 or 5432 directly on the VPS.

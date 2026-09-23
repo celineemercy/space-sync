@@ -6,9 +6,9 @@ This document is the implementation checklist for the CampusSpace MVP. It starts
 
 ## Current Implementation Status
 
-As of 18 September 2026, the repository contains the Expo client, NestJS API, Prisma/PostgreSQL data layer, migrations, idempotent seed, Docker environment, automated unit checks, CI configuration, offline read cache, authenticated reservation flow, and EAS APK profile. The Docker-backed API has passed a live smoke test, including concurrent booking conflict protection.
+As of 23 September 2026, the repository contains the Expo client, NestJS API, Prisma/PostgreSQL data layer, migrations, idempotent seed, local and VPS Docker environments, automated unit checks, CI configuration, offline read cache, authenticated reservation flow, EAS APK profile, automatic HTTPS configuration, backup/restore scripts, and an optional protected VPS deployment workflow. The Docker-backed API has passed a live smoke test, including concurrent booking conflict protection.
 
-The remaining release steps need project-owner resources that are intentionally not stored in this repository: an HTTPS deployment target and production database, an Expo account/EAS project, Android signing credentials managed by EAS, and an Android emulator or physical device for acceptance testing. Those steps are documented in Phases 12–14 and in `docs/testing-guide.md`.
+The remaining release steps need project-owner resources that are intentionally not stored in this repository: the provisioned VPS and DNS name, production secrets, an Expo account/EAS project, Android signing credentials managed by EAS, and an Android emulator or physical device for acceptance testing. Those steps are documented in Phases 12–14, `docs/vps-deployment.md`, and `docs/testing-guide.md`.
 
 ## 1. Definition of Done
 

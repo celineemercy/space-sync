@@ -10,9 +10,13 @@ Review date: 18 September 2026
 - API errors avoid stack traces and credentials in client responses.
 - Explicit 32 KB JSON body limit.
 - Configurable CORS allow-list for browser clients.
+- Global API rate limiting with a stricter login limit.
+- Proxy-aware client IP handling and standard Helmet HTTP headers.
 - Ownership checks for reservation cancellation.
 - PostgreSQL row locking and a transactional conflict recheck before reservation creation.
 - Secrets, signing files, local environment files, and APK/AAB artifacts are ignored by Git.
+- The VPS Compose stack exposes only Caddy; PostgreSQL and the API remain on a private Docker network.
+- Production containers use health checks, bounded JSON logs, least-privilege API capabilities, and a non-root API user.
 
 ## Dependency audit disposition
 
