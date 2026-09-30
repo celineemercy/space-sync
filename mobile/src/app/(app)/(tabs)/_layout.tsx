@@ -1,5 +1,5 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
-import { SymbolView } from "expo-symbols";
 import { Colors, Fonts } from "@/constants/theme";
 
 export default function TabsLayout() {
@@ -25,15 +25,11 @@ export default function TabsLayout() {
           title: "Find a room",
           tabBarLabel: "Search",
           tabBarAccessibilityLabel: "Search rooms",
-          tabBarIcon: ({ color, size }) => (
-            <SymbolView
-              name={{
-                ios: "magnifyingglass",
-                android: "search",
-                web: "search",
-              }}
+          tabBarIcon: ({ color, focused, size }) => (
+            <Ionicons
+              name={focused ? "search" : "search-outline"}
               size={size}
-              tintColor={color}
+              color={color}
             />
           ),
         }}
@@ -44,11 +40,11 @@ export default function TabsLayout() {
           title: "My Reservations",
           tabBarLabel: "Reservations",
           tabBarAccessibilityLabel: "My reservations",
-          tabBarIcon: ({ color, size }) => (
-            <SymbolView
-              name={{ ios: "calendar", android: "event", web: "event" }}
+          tabBarIcon: ({ color, focused, size }) => (
+            <Ionicons
+              name={focused ? "calendar" : "calendar-outline"}
               size={size}
-              tintColor={color}
+              color={color}
             />
           ),
         }}

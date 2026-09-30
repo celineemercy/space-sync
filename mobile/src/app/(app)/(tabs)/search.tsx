@@ -233,7 +233,10 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     backgroundColor: Colors.surface,
   },
-  selectedChip: { borderColor: Colors.primary, backgroundColor: "#E7EEFF" },
+  selectedChip: {
+    borderColor: Colors.primary,
+    backgroundColor: Colors.successSurface,
+  },
   chipText: { color: Colors.textMuted, fontFamily: Fonts.semiBold },
   selectedChipText: { color: Colors.primary },
   resultsHeader: {
@@ -245,7 +248,7 @@ const styles = StyleSheet.create({
     minWidth: 30,
     textAlign: "center",
     color: Colors.primary,
-    backgroundColor: "#E7EEFF",
+    backgroundColor: Colors.successSurface,
     padding: Spacing.xs,
     borderRadius: Radius.pill,
     fontFamily: Fonts.extraBold,

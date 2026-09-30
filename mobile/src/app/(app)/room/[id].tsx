@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
   },
   bookingCard: {
-    backgroundColor: "#E7EEFF",
+    backgroundColor: Colors.successSurface,
     padding: Spacing.lg,
     borderRadius: Radius.lg,
     gap: Spacing.sm,

@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { Alert, Platform, StyleSheet, Text, View } from "react-native";
 import { AppButton } from "@/components/ui/app-button";
 import { Screen } from "@/components/ui/screen";
 import { OfflineBanner, StatusMessage } from "@/components/ui/status-message";
@@ -19,15 +19,27 @@ export default function ReservationsScreen() {
 
   const confirmCancellation = (reservation: Reservation) => {
     if (reservationsQuery.data?.stale) {
+      if (Platform.OS === "web") {
+        window.alert("Reconnect before cancelling a reservation.");
+        return;
+      }
       Alert.alert(
         "Connection required",
         "Reconnect before cancelling a reservation.",
       );
       return;
     }
+
+    const message = `${reservation.room.name}\n${toCampusLabel(reservation.startsAt)}`;
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm(`Cancel reservation?\n\n${message}`);
+      if (confirmed) cancellation.mutate(reservation.id);
+      return;
+    }
+
     Alert.alert(
       "Cancel reservation?",
-      `${reservation.room.name}\n${toCampusLabel(reservation.startsAt)}`,
+      message,
       [
         { text: "Keep reservation", style: "cancel" },
         {
