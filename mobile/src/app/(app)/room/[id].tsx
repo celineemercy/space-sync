@@ -3,7 +3,7 @@ import { Alert, ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { AppButton } from "@/components/ui/app-button";
 import { Screen } from "@/components/ui/screen";
 import { StatusMessage } from "@/components/ui/status-message";
-import { Colors, Radius, Spacing } from "@/constants/theme";
+import { Colors, Fonts, Radius, Spacing } from "@/constants/theme";
 import { useCreateReservation } from "@/features/reservations/queries";
 import { useRoom } from "@/features/rooms/queries";
 import { toCampusLabel } from "@/lib/date-time";
@@ -119,24 +119,29 @@ export default function RoomDetailScreen() {
 const styles = StyleSheet.create({
   center: { alignItems: "center", justifyContent: "center" },
   hero: { gap: Spacing.xs },
-  code: { color: Colors.primary, fontWeight: "900", letterSpacing: 1 },
-  title: { color: Colors.text, fontWeight: "900", fontSize: 28 },
-  location: { color: Colors.textMuted, fontSize: 16 },
+  code: { color: Colors.primary, fontFamily: Fonts.black, letterSpacing: 1 },
+  title: { color: Colors.text, fontFamily: Fonts.black, fontSize: 28 },
+  location: { color: Colors.textMuted, fontSize: 16, fontFamily: Fonts.regular },
   card: {
     backgroundColor: Colors.surface,
     padding: Spacing.lg,
     borderRadius: Radius.lg,
     gap: Spacing.sm,
   },
-  label: { color: Colors.textMuted, fontWeight: "700", marginTop: Spacing.sm },
-  value: { color: Colors.text, fontSize: 17, fontWeight: "700" },
-  description: { color: Colors.text, lineHeight: 22 },
+  label: {
+    color: Colors.textMuted,
+    fontFamily: Fonts.bold,
+    marginTop: Spacing.sm,
+  },
+  value: { color: Colors.text, fontSize: 17, fontFamily: Fonts.bold },
+  description: { color: Colors.text, lineHeight: 22, fontFamily: Fonts.regular },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.sm },
   chip: {
     backgroundColor: Colors.surfaceMuted,
     color: Colors.text,
     padding: Spacing.sm,
     borderRadius: Radius.pill,
+    fontFamily: Fonts.regular,
   },
   bookingCard: {
     backgroundColor: "#E7EEFF",
@@ -144,13 +149,17 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     gap: Spacing.sm,
   },
-  bookingTitle: { color: Colors.primary, fontSize: 18, fontWeight: "800" },
-  to: { color: Colors.textMuted },
+  bookingTitle: {
+    color: Colors.primary,
+    fontSize: 18,
+    fontFamily: Fonts.extraBold,
+  },
+  to: { color: Colors.textMuted, fontFamily: Fonts.regular },
   notice: {
     backgroundColor: Colors.warningSurface,
     padding: Spacing.lg,
     borderRadius: Radius.lg,
     gap: Spacing.md,
   },
-  noticeText: { color: Colors.warning, lineHeight: 21 },
+  noticeText: { color: Colors.warning, lineHeight: 21, fontFamily: Fonts.regular },
 });

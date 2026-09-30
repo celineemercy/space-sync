@@ -2,7 +2,7 @@ import { Alert, StyleSheet, Text, View } from "react-native";
 import { AppButton } from "@/components/ui/app-button";
 import { Screen } from "@/components/ui/screen";
 import { OfflineBanner, StatusMessage } from "@/components/ui/status-message";
-import { Colors, Radius, Spacing } from "@/constants/theme";
+import { Colors, Fonts, Radius, Spacing } from "@/constants/theme";
 import {
   useCancelReservation,
   useReservations,
@@ -121,12 +121,13 @@ function ReservationSection({
 
 const styles = StyleSheet.create({
   section: { gap: Spacing.md },
-  sectionTitle: { color: Colors.text, fontWeight: "900", fontSize: 21 },
+  sectionTitle: { color: Colors.text, fontFamily: Fonts.black, fontSize: 21 },
   empty: {
     color: Colors.textMuted,
     backgroundColor: Colors.surface,
     padding: Spacing.lg,
     borderRadius: Radius.lg,
+    fontFamily: Fonts.regular,
   },
   card: {
     backgroundColor: Colors.surface,
@@ -139,12 +140,12 @@ const styles = StyleSheet.create({
   code: {
     color: Colors.primary,
     fontSize: 12,
-    fontWeight: "900",
+    fontFamily: Fonts.black,
     letterSpacing: 0.8,
   },
-  title: { color: Colors.text, fontSize: 18, fontWeight: "800" },
-  location: { color: Colors.textMuted },
-  time: { color: Colors.text, fontWeight: "600" },
-  status: { color: Colors.accent, fontSize: 11, fontWeight: "900" },
+  title: { color: Colors.text, fontSize: 18, fontFamily: Fonts.extraBold },
+  location: { color: Colors.textMuted, fontFamily: Fonts.regular },
+  time: { color: Colors.text, fontFamily: Fonts.semiBold },
+  status: { color: Colors.accent, fontSize: 11, fontFamily: Fonts.black },
   cancelled: { color: Colors.textMuted },
 });

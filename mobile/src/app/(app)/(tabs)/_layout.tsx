@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Colors } from "@/constants/theme";
+import { Colors, Fonts } from "@/constants/theme";
 
 export default function TabsLayout() {
   return (
@@ -7,9 +7,11 @@ export default function TabsLayout() {
       screenOptions={{
         headerStyle: { backgroundColor: Colors.surface },
         headerTintColor: Colors.text,
+        headerTitleStyle: { fontFamily: Fonts.semiBold },
         headerShadowVisible: false,
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textMuted,
+        tabBarLabelStyle: { fontFamily: Fonts.medium },
         tabBarStyle: {
           backgroundColor: Colors.surface,
           borderTopColor: Colors.border,

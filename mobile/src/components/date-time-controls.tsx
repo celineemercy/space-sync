@@ -3,7 +3,7 @@ import DateTimePicker, {
 } from "@react-native-community/datetimepicker";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Colors, Radius, Spacing } from "@/constants/theme";
+import { Colors, Fonts, Radius, Spacing } from "@/constants/theme";
 
 type Picker = "date" | "start" | "end" | null;
 
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", gap: Spacing.md },
   flex: { flex: 1 },
   field: { gap: Spacing.xs },
-  label: { color: Colors.text, fontWeight: "600", fontSize: 14 },
+  label: { color: Colors.text, fontFamily: Fonts.semiBold, fontSize: 14 },
   button: {
     minHeight: 48,
     justifyContent: "center",
@@ -115,5 +115,5 @@ const styles = StyleSheet.create({
     borderRadius: Radius.md,
     backgroundColor: Colors.surface,
   },
-  value: { color: Colors.text, fontSize: 16 },
+  value: { color: Colors.text, fontSize: 16, fontFamily: Fonts.regular },
 });

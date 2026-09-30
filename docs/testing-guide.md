@@ -21,7 +21,9 @@ Expected services:
 
 - `campus-space-db-1` is healthy on host port `5433`.
 - `campus-space-server-1` is healthy on host port `3000`.
+- `campus-space-mobile-web-1` serves the browser UI on host port `8081`.
 - `http://localhost:3000/api/v1/health` returns an OK response.
+- `http://localhost:8081` opens the browser-based mobile UI preview.
 
 Before the first start, replace the placeholders in the ignored root `.env`. The local seed creates the demo login declared there. These credentials are for local course development only and must not be reused in production.
 

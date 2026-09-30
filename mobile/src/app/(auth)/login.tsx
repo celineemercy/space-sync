@@ -7,7 +7,7 @@ import { AppButton } from "@/components/ui/app-button";
 import { FormField } from "@/components/ui/form-field";
 import { Screen } from "@/components/ui/screen";
 import { StatusMessage } from "@/components/ui/status-message";
-import { Colors, Radius, Spacing } from "@/constants/theme";
+import { Colors, Fonts, Radius, Spacing } from "@/constants/theme";
 import { useAuth } from "@/providers/auth-provider";
 
 const loginSchema = z.object({
@@ -110,9 +110,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  markText: { color: "#FFFFFF", fontSize: 24, fontWeight: "900" },
-  title: { color: Colors.text, fontSize: 32, fontWeight: "900" },
-  subtitle: { color: Colors.textMuted, fontSize: 16, textAlign: "center" },
+  markText: { color: "#FFFFFF", fontSize: 24, fontFamily: Fonts.black },
+  title: { color: Colors.text, fontSize: 32, fontFamily: Fonts.black },
+  subtitle: {
+    color: Colors.textMuted,
+    fontSize: 16,
+    textAlign: "center",
+    fontFamily: Fonts.regular,
+  },
   card: {
     backgroundColor: Colors.surface,
     padding: Spacing.xl,
@@ -121,5 +126,5 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     gap: Spacing.lg,
   },
-  cardTitle: { color: Colors.text, fontSize: 20, fontWeight: "800" },
+  cardTitle: { color: Colors.text, fontSize: 20, fontFamily: Fonts.extraBold },
 });

@@ -7,7 +7,7 @@ import { AppButton } from "@/components/ui/app-button";
 import { FormField } from "@/components/ui/form-field";
 import { Screen } from "@/components/ui/screen";
 import { OfflineBanner, StatusMessage } from "@/components/ui/status-message";
-import { Colors, Radius, Spacing } from "@/constants/theme";
+import { Colors, Fonts, Radius, Spacing } from "@/constants/theme";
 import { useAvailabilitySearch, useRooms } from "@/features/rooms/queries";
 import {
   combineDateAndTime,
@@ -203,12 +203,12 @@ const styles = StyleSheet.create({
   eyebrow: {
     color: Colors.textMuted,
     fontSize: 11,
-    fontWeight: "800",
+    fontFamily: Fonts.extraBold,
     letterSpacing: 1,
   },
-  email: { color: Colors.text, fontWeight: "700", marginTop: 2 },
+  email: { color: Colors.text, fontFamily: Fonts.bold, marginTop: 2 },
   signOut: { padding: Spacing.sm },
-  signOutText: { color: Colors.primary, fontWeight: "700" },
+  signOutText: { color: Colors.primary, fontFamily: Fonts.bold },
   panel: {
     backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
@@ -217,9 +217,13 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     gap: Spacing.lg,
   },
-  sectionTitle: { color: Colors.text, fontSize: 20, fontWeight: "800" },
+  sectionTitle: {
+    color: Colors.text,
+    fontSize: 20,
+    fontFamily: Fonts.extraBold,
+  },
   filterGroup: { gap: Spacing.sm },
-  filterLabel: { color: Colors.text, fontWeight: "600", fontSize: 14 },
+  filterLabel: { color: Colors.text, fontFamily: Fonts.semiBold, fontSize: 14 },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.sm },
   chip: {
     paddingHorizontal: Spacing.md,
@@ -230,7 +234,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
   },
   selectedChip: { borderColor: Colors.primary, backgroundColor: "#E7EEFF" },
-  chipText: { color: Colors.textMuted, fontWeight: "600" },
+  chipText: { color: Colors.textMuted, fontFamily: Fonts.semiBold },
   selectedChipText: { color: Colors.primary },
   resultsHeader: {
     flexDirection: "row",
@@ -244,7 +248,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#E7EEFF",
     padding: Spacing.xs,
     borderRadius: Radius.pill,
-    fontWeight: "800",
+    fontFamily: Fonts.extraBold,
   },
   empty: {
     backgroundColor: Colors.surface,
@@ -255,8 +259,13 @@ const styles = StyleSheet.create({
   emptyTitle: {
     color: Colors.text,
     textAlign: "center",
-    fontWeight: "800",
+    fontFamily: Fonts.extraBold,
     fontSize: 18,
   },
-  emptyText: { color: Colors.textMuted, textAlign: "center", lineHeight: 21 },
+  emptyText: {
+    color: Colors.textMuted,
+    textAlign: "center",
+    lineHeight: 21,
+    fontFamily: Fonts.regular,
+  },
 });

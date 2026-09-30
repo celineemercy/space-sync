@@ -36,6 +36,29 @@ The committed example uses `http://10.0.2.2:3000/api/v1`, which is the Android e
 
 Docker runs the API and PostgreSQL, but it does not replace an Android emulator or phone. See `../docs/testing-guide.md` for the complete workflow.
 
+## Docker web preview
+
+The `full` Compose profile also builds a browser preview of the mobile UI. From
+the repository root, start the stack and seed the demo data:
+
+```bash
+docker compose --profile full up -d --build
+docker compose --profile full exec server npm run db:seed
+```
+
+Open `http://localhost:8081`. The browser build uses web-only local storage
+adapters for the native SecureStore and SQLite-backed cache. It is useful for UI
+and workflow checks, but an Android emulator or APK is still required for final
+native acceptance testing.
+
+The web bundle calls `http://localhost:3000/api/v1` by default. Override the
+build-time browser URL or host port in the root `.env` when needed:
+
+```dotenv
+MOBILE_WEB_API_URL=http://localhost:3000/api/v1
+MOBILE_WEB_PORT=8081
+```
+
 ## APK profile
 
 `eas.json` contains an internal-distribution `apk` profile. After deploying the API over HTTPS and linking an Expo account, build with:

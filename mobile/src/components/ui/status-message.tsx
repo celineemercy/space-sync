@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 import { ApiClientError } from "@/lib/api";
-import { Colors, Radius, Spacing } from "@/constants/theme";
+import { Colors, Fonts, Radius, Spacing } from "@/constants/theme";
 
 export function StatusMessage({ error }: { error: unknown }) {
   const message =
@@ -35,11 +35,11 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     borderRadius: Radius.md,
   },
-  text: { color: Colors.danger, lineHeight: 20 },
+  text: { color: Colors.danger, lineHeight: 20, fontFamily: Fonts.regular },
   offline: {
     backgroundColor: Colors.warningSurface,
     padding: Spacing.md,
     borderRadius: Radius.md,
   },
-  offlineText: { color: Colors.warning, fontWeight: "600" },
+  offlineText: { color: Colors.warning, fontFamily: Fonts.semiBold },
 });
