@@ -106,7 +106,10 @@ function WebPicker({
 }
 
 const inputStyle: CSSProperties = {
+  height: 48,
   minHeight: 48,
+  maxHeight: 48,
+  flex: "0 0 48px",
   boxSizing: "border-box",
   width: "100%",
   padding: `0 ${Spacing.md}px`,

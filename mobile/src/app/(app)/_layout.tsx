@@ -1,7 +1,21 @@
-import { Stack } from "expo-router";
+import { Redirect, Stack } from "expo-router";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { Colors, Typography } from "@/constants/theme";
+import { useAuth } from "@/providers/auth-provider";
 
 export default function AppLayout() {
+  const { accessToken, isRestoring } = useAuth();
+
+  if (isRestoring) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color={Colors.primary} size="large" />
+      </View>
+    );
+  }
+
+  if (!accessToken) return <Redirect href="/(auth)/login" />;
+
   return (
     <Stack
       screenOptions={{
@@ -16,3 +30,7 @@ export default function AppLayout() {
     </Stack>
   );
 }
+
+const styles = StyleSheet.create({
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
+});
