@@ -1,4 +1,4 @@
-name: campus-space
+name: space-sync
 
 services:
   db:
