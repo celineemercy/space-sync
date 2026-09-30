@@ -1,13 +1,13 @@
 import { Stack } from "expo-router";
-import { Colors, Fonts } from "@/constants/theme";
+import { Colors, Typography } from "@/constants/theme";
 
 export default function AppLayout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: Colors.surface },
-        headerTintColor: Colors.text,
-        headerTitleStyle: { fontFamily: Fonts.semiBold },
+        headerStyle: { backgroundColor: Colors.primary },
+        headerTintColor: "#FFFFFF",
+        headerTitleStyle: Typography.title,
         headerShadowVisible: false,
       }}
     >

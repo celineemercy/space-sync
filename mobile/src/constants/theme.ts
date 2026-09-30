@@ -34,3 +34,50 @@ export const Fonts = {
   extraBold: "Inter_800ExtraBold",
   black: "Inter_900Black",
 } as const;
+
+export const Typography = {
+  display: {
+    fontFamily: Fonts.black,
+    fontSize: 32,
+    lineHeight: 38,
+    letterSpacing: -0.8,
+  },
+  headline: {
+    fontFamily: Fonts.extraBold,
+    fontSize: 24,
+    lineHeight: 30,
+    letterSpacing: -0.4,
+  },
+  title: {
+    fontFamily: Fonts.bold,
+    fontSize: 18,
+    lineHeight: 24,
+    letterSpacing: -0.2,
+  },
+  body: {
+    fontFamily: Fonts.regular,
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  bodyStrong: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  label: {
+    fontFamily: Fonts.semiBold,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  caption: {
+    fontFamily: Fonts.medium,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  overline: {
+    fontFamily: Fonts.bold,
+    fontSize: 11,
+    lineHeight: 16,
+    letterSpacing: 1.1,
+  },
+} as const;

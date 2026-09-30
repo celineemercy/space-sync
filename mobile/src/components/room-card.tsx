@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Colors, Fonts, Radius, Spacing } from "@/constants/theme";
+import { Colors, Radius, Spacing, Typography } from "@/constants/theme";
 import type { Room } from "@/types/domain";
 
 export function RoomCard({
@@ -49,18 +49,16 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   code: {
     color: Colors.primary,
-    fontFamily: Fonts.extraBold,
-    fontSize: 12,
+    ...Typography.overline,
     letterSpacing: 0.8,
   },
   title: {
     color: Colors.text,
-    fontSize: 18,
-    fontFamily: Fonts.bold,
+    ...Typography.title,
     marginTop: 2,
   },
-  capacity: { color: Colors.accent, fontFamily: Fonts.bold },
-  location: { color: Colors.textMuted, fontFamily: Fonts.regular },
+  capacity: { ...Typography.label, color: Colors.accent },
+  location: { ...Typography.body, color: Colors.textMuted },
   facilities: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.sm },
   chip: {
     color: Colors.text,
@@ -68,7 +66,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     borderRadius: Radius.pill,
-    fontSize: 12,
-    fontFamily: Fonts.regular,
+    ...Typography.caption,
   },
 });

@@ -1,6 +1,6 @@
 import type { ChangeEvent, CSSProperties } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { Colors, Fonts, Spacing } from "@/constants/theme";
+import { Colors, Spacing, Typography } from "@/constants/theme";
 
 type Props = {
   date: Date;
@@ -114,8 +114,7 @@ const inputStyle: CSSProperties = {
   borderRadius: 12,
   background: Colors.surface,
   color: Colors.text,
-  fontSize: 16,
-  fontFamily: Fonts.regular,
+  ...Typography.body,
 };
 
 const styles = StyleSheet.create({
@@ -123,5 +122,5 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", gap: Spacing.md },
   flex: { flex: 1 },
   field: { gap: Spacing.xs },
-  label: { color: Colors.text, fontFamily: Fonts.semiBold, fontSize: 14 },
+  label: { ...Typography.label, color: Colors.text },
 });

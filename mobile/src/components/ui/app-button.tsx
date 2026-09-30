@@ -5,7 +5,7 @@ import {
   Text,
   type PressableProps,
 } from "react-native";
-import { Colors, Fonts, Radius, Spacing } from "@/constants/theme";
+import { Colors, Radius, Spacing, Typography } from "@/constants/theme";
 
 type Props = PressableProps & {
   label: string;
@@ -68,6 +68,6 @@ const styles = StyleSheet.create({
   },
   pressed: { opacity: 0.82 },
   disabled: { opacity: 0.55 },
-  label: { color: "#FFFFFF", fontSize: 16, fontFamily: Fonts.bold },
+  label: { ...Typography.bodyStrong, color: "#FFFFFF" },
   secondaryLabel: { color: Colors.text },
 });

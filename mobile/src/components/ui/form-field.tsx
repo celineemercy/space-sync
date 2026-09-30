@@ -5,7 +5,7 @@ import {
   View,
   type TextInputProps,
 } from "react-native";
-import { Colors, Fonts, Radius, Spacing } from "@/constants/theme";
+import { Colors, Radius, Spacing, Typography } from "@/constants/theme";
 
 type Props = TextInputProps & { label: string; error?: string };
 
@@ -26,7 +26,7 @@ export function FormField({ label, error, style, ...props }: Props) {
 
 const styles = StyleSheet.create({
   wrapper: { gap: Spacing.xs },
-  label: { color: Colors.text, fontFamily: Fonts.semiBold, fontSize: 14 },
+  label: { ...Typography.label, color: Colors.text },
   input: {
     minHeight: 48,
     borderWidth: 1,
@@ -35,9 +35,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     paddingHorizontal: Spacing.md,
     color: Colors.text,
-    fontSize: 16,
-    fontFamily: Fonts.regular,
+    ...Typography.body,
   },
   inputError: { borderColor: Colors.danger },
-  error: { color: Colors.danger, fontSize: 13, fontFamily: Fonts.regular },
+  error: { ...Typography.caption, color: Colors.danger },
 });
