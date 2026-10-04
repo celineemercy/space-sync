@@ -17,7 +17,7 @@ import {
   isValidRange,
 } from "@/lib/date-time";
 import { useAuth } from "@/providers/auth-provider";
-import type { Room } from "@/types/domain";
+import type { AvailabilityInput, Room } from "@/types/domain";
 
 export default function SearchScreen() {
   const router = useRouter();
@@ -29,10 +29,16 @@ export default function SearchScreen() {
   const [capacity, setCapacity] = useState("");
   const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [searchedInput, setSearchedInput] = useState<AvailabilityInput | null>(null);
   const [showSignOutConfirmation, setShowSignOutConfirmation] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const roomsQuery = useRooms();
   const availability = useAvailabilitySearch();
+
+  const clearSearch = () => {
+    setSearchedInput(null);
+    availability.reset();
+  };
 
   const allRooms = useMemo(
     () => roomsQuery.data?.rooms ?? [],
@@ -50,6 +56,7 @@ export default function SearchScreen() {
   }, [allRooms]);
 
   const applyDate = (nextDate: Date) => {
+    clearSearch();
     setDate(nextDate);
     setStartsAt(combineDateAndTime(nextDate, startsAt));
     setEndsAt(combineDateAndTime(nextDate, endsAt));
@@ -71,24 +78,27 @@ export default function SearchScreen() {
       return;
     }
     setValidationError(null);
-    availability.mutate({
+    const input: AvailabilityInput = {
       startsAt: start.toISOString(),
       endsAt: end.toISOString(),
       minCapacity: parsedCapacity,
       facilityIds: selectedFacilities,
-    });
+    };
+    setSearchedInput(input);
+    availability.mutate(input);
   };
 
   const openRoom = (room: Room) => {
     const params: Record<string, string> = { id: room.id };
-    if (availability.data) {
-      params.startsAt = availability.data.startsAt;
-      params.endsAt = availability.data.endsAt;
+    if (searchedInput && availability.data) {
+      params.startsAt = searchedInput.startsAt;
+      params.endsAt = searchedInput.endsAt;
     }
     router.push({ pathname: "/(app)/room/[id]", params });
   };
 
-  const visibleRooms = availability.data?.rooms ?? allRooms;
+  const searchResult = searchedInput ? availability.data : null;
+  const visibleRooms = searchResult?.rooms ?? allRooms;
 
   const confirmSignOut = async () => {
     setIsSigningOut(true);
@@ -127,13 +137,22 @@ export default function SearchScreen() {
             startsAt={startsAt}
             endsAt={endsAt}
             onDateChange={applyDate}
-            onStartChange={setStartsAt}
-            onEndChange={setEndsAt}
+            onStartChange={(value) => {
+              clearSearch();
+              setStartsAt(value);
+            }}
+            onEndChange={(value) => {
+              clearSearch();
+              setEndsAt(value);
+            }}
           />
           <FormField
             label="Minimum capacity (optional)"
             value={capacity}
-            onChangeText={setCapacity}
+            onChangeText={(value) => {
+              clearSearch();
+              setCapacity(value);
+            }}
             keyboardType="number-pad"
             placeholder="For example, 8"
           />
@@ -148,13 +167,14 @@ export default function SearchScreen() {
                       key={facility.id}
                       accessibilityRole="checkbox"
                       accessibilityState={{ checked: selected }}
-                      onPress={() =>
+                      onPress={() => {
+                        clearSearch();
                         setSelectedFacilities((current) =>
                           selected
                             ? current.filter((id) => id !== facility.id)
                             : [...current, facility.id],
-                        )
-                      }
+                        );
+                      }}
                       style={[styles.chip, selected && styles.selectedChip]}
                     >
                       <Text
@@ -186,7 +206,7 @@ export default function SearchScreen() {
 
         <View style={styles.resultsHeader}>
           <Text style={styles.sectionTitle}>
-            {availability.data ? "Available rooms" : "Campus rooms"}
+            {searchResult ? "Available rooms" : "Campus rooms"}
           </Text>
           <Text style={styles.count}>{visibleRooms.length}</Text>
         </View>
