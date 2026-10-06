@@ -163,7 +163,9 @@ export default function RoomDetailScreen() {
         description={
           dialog === "success"
             ? `${room.name} has been added to your reservations.`
-            : `${room.name} will be reserved from ${toCampusLabel(startsAt)} until ${toCampusLabel(endsAt)}.`
+            : startsAt && endsAt
+              ? `${room.name} will be reserved from ${toCampusLabel(startsAt)} until ${toCampusLabel(endsAt)}.`
+              : "Return to Search and choose a valid time before reserving."
         }
         confirmLabel={
           dialog === "success" ? "View reservations" : "Reserve room"
