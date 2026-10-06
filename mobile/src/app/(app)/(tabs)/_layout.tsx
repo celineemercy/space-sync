@@ -32,6 +32,21 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="saved"
+        options={{
+          title: "Saved Rooms",
+          tabBarLabel: "Saved",
+          tabBarAccessibilityLabel: "Saved rooms",
+          tabBarIcon: ({ color, focused, size }) => (
+            <Ionicons
+              name={focused ? "bookmark" : "bookmark-outline"}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="reservations"
         options={{
           title: "My Reservations",

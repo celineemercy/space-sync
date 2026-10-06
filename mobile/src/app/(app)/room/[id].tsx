@@ -9,6 +9,10 @@ import { StatusMessage } from "@/components/ui/status-message";
 import { Colors, Radius, Spacing, Typography } from "@/constants/theme";
 import { useCreateReservation } from "@/features/reservations/queries";
 import { useRoom } from "@/features/rooms/queries";
+import {
+  useSavedRooms,
+  useSaveRoom,
+} from "@/features/saved-rooms/queries";
 import { toCampusLabel } from "@/lib/date-time";
 
 function first(value: string | string[] | undefined): string {
@@ -27,6 +31,8 @@ export default function RoomDetailScreen() {
   const endsAt = first(params.endsAt);
   const roomQuery = useRoom(roomId);
   const reservation = useCreateReservation();
+  const savedRooms = useSavedRooms();
+  const saveRoom = useSaveRoom();
   const [dialog, setDialog] = useState<"confirm" | "success" | null>(null);
 
   const reserve = async () => {
@@ -61,6 +67,20 @@ export default function RoomDetailScreen() {
   }
 
   const room = roomQuery.data;
+  const isSaved = savedRooms.data?.some((item) => item.roomId === room.id);
+
+  const saveLocally = async () => {
+    if (isSaved) {
+      router.push("/(app)/(tabs)/saved");
+      return;
+    }
+    try {
+      await saveRoom.mutateAsync({ room });
+    } catch {
+      // The local persistence error is rendered in the same card.
+    }
+  };
+
   return (
     <View style={styles.page}>
       <Screen>
@@ -85,6 +105,23 @@ export default function RoomDetailScreen() {
               </Text>
             ))}
           </View>
+        </View>
+
+        <View style={styles.savedCard}>
+          <Text style={styles.savedTitle}>Keep for later</Text>
+          <Text style={styles.description}>
+            Save this room on this device, then add a personal note from the
+            Saved tab. It remains available after restarting the app.
+          </Text>
+          {savedRooms.error ? <StatusMessage error={savedRooms.error} /> : null}
+          {saveRoom.error ? <StatusMessage error={saveRoom.error} /> : null}
+          <AppButton
+            disabled={savedRooms.isLoading}
+            label={isSaved ? "View saved rooms" : "Save room locally"}
+            loading={saveRoom.isPending}
+            onPress={saveLocally}
+            variant={isSaved ? "secondary" : "primary"}
+          />
         </View>
 
         {startsAt && endsAt ? (
@@ -178,6 +215,15 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     gap: Spacing.sm,
   },
+  savedCard: {
+    backgroundColor: Colors.surface,
+    borderColor: Colors.border,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    gap: Spacing.md,
+    padding: Spacing.lg,
+  },
+  savedTitle: { ...Typography.title, color: Colors.primary },
   bookingTitle: {
     color: Colors.primary,
     ...Typography.title,
