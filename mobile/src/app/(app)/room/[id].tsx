@@ -1,7 +1,8 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { AppButton } from "@/components/ui/app-button";
+import { ErrorState, LoadingState } from "@/components/ui/async-state";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Screen } from "@/components/ui/screen";
 import { StatusMessage } from "@/components/ui/status-message";
@@ -41,14 +42,20 @@ export default function RoomDetailScreen() {
   if (roomQuery.isLoading) {
     return (
       <Screen scroll={false} style={styles.center}>
-        <ActivityIndicator color={Colors.primary} size="large" />
+        <LoadingState label="Loading room details..." />
       </Screen>
     );
   }
   if (roomQuery.error || !roomQuery.data) {
     return (
       <Screen>
-        {roomQuery.error ? <StatusMessage error={roomQuery.error} /> : null}
+        {roomQuery.error ? (
+          <ErrorState
+            error={roomQuery.error}
+            retrying={roomQuery.isFetching}
+            onRetry={() => void roomQuery.refetch()}
+          />
+        ) : null}
       </Screen>
     );
   }

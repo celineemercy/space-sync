@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Alert, Platform, StyleSheet, Text, View } from "react-native";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppButton } from "@/components/ui/app-button";
+import { ErrorState, LoadingState } from "@/components/ui/async-state";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Screen } from "@/components/ui/screen";
 import { OfflineBanner, StatusMessage } from "@/components/ui/status-message";
@@ -62,27 +63,36 @@ export default function ReservationsScreen() {
         {reservationsQuery.data?.stale ? (
           <OfflineBanner updatedAt={reservationsQuery.data.updatedAt} />
         ) : null}
-        {reservationsQuery.error && !reservationsQuery.data ? (
-          <StatusMessage error={reservationsQuery.error} />
-        ) : null}
         {cancellation.error ? (
           <StatusMessage error={cancellation.error} />
         ) : null}
 
-        <ReservationSection
-          title="Upcoming"
-          reservations={confirmed}
-          empty="You do not have an active reservation yet."
-          onCancel={confirmCancellation}
-          cancellingId={
-            cancellation.isPending ? cancellation.variables : undefined
-          }
-        />
-        <ReservationSection
-          title="Cancelled"
-          reservations={cancelled}
-          empty="Cancelled reservations will appear here."
-        />
+        {reservationsQuery.isLoading ? (
+          <LoadingState label="Loading your reservations..." />
+        ) : reservationsQuery.error && !reservationsQuery.data ? (
+          <ErrorState
+            error={reservationsQuery.error}
+            retrying={reservationsQuery.isFetching}
+            onRetry={() => void reservationsQuery.refetch()}
+          />
+        ) : (
+          <>
+            <ReservationSection
+              title="Upcoming"
+              reservations={confirmed}
+              empty="You do not have an active reservation yet."
+              onCancel={confirmCancellation}
+              cancellingId={
+                cancellation.isPending ? cancellation.variables : undefined
+              }
+            />
+            <ReservationSection
+              title="Cancelled"
+              reservations={cancelled}
+              empty="Cancelled reservations will appear here."
+            />
+          </>
+        )}
       </Screen>
       <ConfirmationDialog
         visible={Boolean(reservationToCancel)}

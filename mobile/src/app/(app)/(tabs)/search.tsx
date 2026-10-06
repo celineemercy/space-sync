@@ -5,6 +5,7 @@ import { DateTimeControls } from "@/components/date-time-controls";
 import { RoomCard } from "@/components/room-card";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppButton } from "@/components/ui/app-button";
+import { ErrorState, LoadingState } from "@/components/ui/async-state";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { FormField } from "@/components/ui/form-field";
 import { Screen } from "@/components/ui/screen";
@@ -195,7 +196,13 @@ export default function SearchScreen() {
             <StatusMessage error={new Error(validationError)} />
           ) : null}
           {availability.error ? (
-            <StatusMessage error={availability.error} />
+            <ErrorState
+              error={availability.error}
+              retrying={availability.isPending}
+              onRetry={() => {
+                if (searchedInput) availability.mutate(searchedInput);
+              }}
+            />
           ) : null}
           <AppButton
             label="Search availability"
@@ -211,20 +218,26 @@ export default function SearchScreen() {
           <Text style={styles.count}>{visibleRooms.length}</Text>
         </View>
 
-        {roomsQuery.error && !roomsQuery.data ? (
-          <StatusMessage error={roomsQuery.error} />
-        ) : null}
-        {!roomsQuery.isLoading && visibleRooms.length === 0 ? (
+        {roomsQuery.isLoading ? (
+          <LoadingState label="Loading campus rooms..." />
+        ) : roomsQuery.error && !roomsQuery.data ? (
+          <ErrorState
+            error={roomsQuery.error}
+            retrying={roomsQuery.isFetching}
+            onRetry={() => void roomsQuery.refetch()}
+          />
+        ) : visibleRooms.length === 0 ? (
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>No rooms found</Text>
             <Text style={styles.emptyText}>
               Try another time, a smaller capacity, or fewer facilities.
             </Text>
           </View>
-        ) : null}
-        {visibleRooms.map((room) => (
-          <RoomCard key={room.id} room={room} onPress={() => openRoom(room)} />
-        ))}
+        ) : (
+          visibleRooms.map((room) => (
+            <RoomCard key={room.id} room={room} onPress={() => openRoom(room)} />
+          ))
+        )}
       </Screen>
       <ConfirmationDialog
         visible={showSignOutConfirmation}
