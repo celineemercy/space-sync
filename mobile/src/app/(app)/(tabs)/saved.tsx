@@ -8,13 +8,15 @@ import { FormField } from "@/components/ui/form-field";
 import { Screen } from "@/components/ui/screen";
 import { StatusMessage } from "@/components/ui/status-message";
 import { Colors, Radius, Spacing, Typography } from "@/constants/theme";
-import type { SavedRoom } from "@/features/saved-rooms/model";
+import {
+  SAVED_ROOM_NOTE_MAX_LENGTH,
+  type SavedRoom,
+} from "@/features/saved-rooms/model";
 import {
   useDeleteSavedRoom,
   useSavedRooms,
   useUpdateSavedRoom,
 } from "@/features/saved-rooms/queries";
-import { SAVED_ROOM_NOTE_MAX_LENGTH } from "@/features/saved-rooms/use-cases";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function SavedRoomsScreen() {

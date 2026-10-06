@@ -1,5 +1,7 @@
 import type { Room } from "@/types/domain";
 
+export const SAVED_ROOM_NOTE_MAX_LENGTH = 200;
+
 export type SavedRoom = {
   id: string;
   roomId: string;

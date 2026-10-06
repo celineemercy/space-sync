@@ -1,13 +1,12 @@
-import type {
-  CreateSavedRoomInput,
-  UpdateSavedRoomInput,
+import {
+  SAVED_ROOM_NOTE_MAX_LENGTH,
+  type CreateSavedRoomInput,
+  type UpdateSavedRoomInput,
 } from "@/features/saved-rooms/model";
 import {
   savedRoomsRepository,
   type SavedRoomsRepository,
 } from "@/features/saved-rooms/repository";
-
-export const SAVED_ROOM_NOTE_MAX_LENGTH = 200;
 
 export function listSavedRooms(
   repository: SavedRoomsRepository = savedRoomsRepository,
