@@ -3,6 +3,20 @@ import SearchScreen from "@/app/(app)/(tabs)/search";
 import type { AvailabilityResponse, Room } from "@/types/domain";
 
 const mockPush = jest.fn();
+const mockRefetchRooms = jest.fn();
+const mockRoomsQuery: {
+  data: { rooms: Room[]; stale: boolean; updatedAt: string | null } | undefined;
+  error: Error | null;
+  isLoading: boolean;
+  isFetching: boolean;
+  refetch: jest.Mock;
+} = {
+  data: undefined,
+  error: null,
+  isLoading: false,
+  isFetching: false,
+  refetch: mockRefetchRooms,
+};
 const mockAvailability: {
   data: AvailabilityResponse | undefined;
   error: Error | null;
@@ -17,7 +31,7 @@ const mockAvailability: {
   reset: jest.fn(),
 };
 
-const mockCampusRoom: Room = {
+const campusRoom: Room = {
   id: "campus-room",
   code: "A1",
   name: "Campus Room",
@@ -27,7 +41,7 @@ const mockCampusRoom: Room = {
   facilities: [{ id: "projector", name: "Projector" }],
 };
 const availableRoom: Room = {
-  ...mockCampusRoom,
+  ...campusRoom,
   id: "available-room",
   code: "B1",
   name: "Available Room",
@@ -43,11 +57,7 @@ jest.mock("@/providers/auth-provider", () => ({
   }),
 }));
 jest.mock("@/features/rooms/queries", () => ({
-  useRooms: () => ({
-    data: { rooms: [mockCampusRoom], stale: false, updatedAt: null },
-    error: null,
-    isLoading: false,
-  }),
+  useRooms: () => mockRoomsQuery,
   useAvailabilitySearch: () => mockAvailability,
 }));
 jest.mock("@/components/date-time-controls", () => {
@@ -79,21 +89,91 @@ jest.mock("@/components/date-time-controls", () => {
 });
 
 beforeEach(() => {
+  mockRoomsQuery.data = {
+    rooms: [campusRoom],
+    stale: false,
+    updatedAt: null,
+  };
+  mockRoomsQuery.error = null;
+  mockRoomsQuery.isLoading = false;
+  mockRoomsQuery.isFetching = false;
   mockAvailability.data = {
     startsAt: "2030-01-01T02:00:00.000Z",
     endsAt: "2030-01-01T03:00:00.000Z",
     rooms: [availableRoom],
   };
-  mockAvailability.mutate.mockClear();
-  mockAvailability.reset.mockClear();
-  mockPush.mockClear();
+  mockAvailability.error = null;
+  mockAvailability.isPending = false;
+  mockAvailability.mutate.mockReset();
+  mockAvailability.reset.mockReset();
+  mockRefetchRooms.mockReset();
+  mockPush.mockReset();
+});
+
+describe("SearchScreen primary states", () => {
+  it("renders the initial loading state", async () => {
+    mockRoomsQuery.data = undefined;
+    mockRoomsQuery.isLoading = true;
+    const screen = await render(<SearchScreen />);
+    expect(screen.getByLabelText("Loading campus rooms...")).toBeTruthy();
+  });
+
+  it("renders rooms after data loads", async () => {
+    const screen = await render(<SearchScreen />);
+    expect(screen.getByText("Campus Room")).toBeTruthy();
+    expect(screen.getByText("A1")).toBeTruthy();
+  });
+
+  it("renders the empty state", async () => {
+    mockRoomsQuery.data = { rooms: [], stale: false, updatedAt: null };
+    const screen = await render(<SearchScreen />);
+    expect(screen.getByText("No rooms found")).toBeTruthy();
+  });
+
+  it("renders an error and retries the room query", async () => {
+    mockRoomsQuery.data = undefined;
+    mockRoomsQuery.error = new Error("Rooms could not be loaded.");
+    const screen = await render(<SearchScreen />);
+    await fireEvent.press(screen.getByLabelText("Try again"));
+    expect(screen.getByText("Rooms could not be loaded.")).toBeTruthy();
+    expect(mockRefetchRooms).toHaveBeenCalledTimes(1);
+  });
+
+  it("validates the form before requesting availability", async () => {
+    const screen = await render(<SearchScreen />);
+    await fireEvent.changeText(
+      screen.getByLabelText("Minimum capacity (optional)"),
+      "0",
+    );
+    await fireEvent.press(screen.getByLabelText("Search availability"));
+    expect(
+      screen.getByText("Capacity must be a positive whole number."),
+    ).toBeTruthy();
+    expect(mockAvailability.mutate).not.toHaveBeenCalled();
+  });
+
+  it("disables repeat submission while availability is loading", async () => {
+    const screen = await render(<SearchScreen />);
+    await fireEvent.press(screen.getByLabelText("Search availability"));
+    expect(mockAvailability.mutate).toHaveBeenCalledTimes(1);
+
+    mockAvailability.isPending = true;
+    await screen.rerender(<SearchScreen />);
+    const submit = screen.getByLabelText("Search availability");
+    expect(submit.props.accessibilityState).toEqual({
+      busy: true,
+      disabled: true,
+    });
+    await fireEvent.press(submit);
+    expect(mockAvailability.mutate).toHaveBeenCalledTimes(1);
+  });
 });
 
 it.each(["capacity", "facility", "date", "start", "end"])(
   "removes old availability results when %s changes",
   async (field) => {
     const screen = await render(<SearchScreen />);
-    await fireEvent.press(screen.getByText("Search availability"));
+    await fireEvent.press(screen.getByLabelText("Search availability"));
     expect(screen.getByText("Available rooms")).toBeTruthy();
     expect(screen.getByText("Available Room")).toBeTruthy();
 
@@ -105,7 +185,9 @@ it.each(["capacity", "facility", "date", "start", "end"])(
         );
         break;
       case "facility":
-        await fireEvent.press(screen.getByRole("checkbox", { name: "Projector" }));
+        await fireEvent.press(
+          screen.getByRole("checkbox", { name: "Projector" }),
+        );
         break;
       case "date":
         await fireEvent.press(screen.getByText("Change date"));
