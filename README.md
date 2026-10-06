@@ -248,6 +248,10 @@ For the two-feature TanStack Query state-management implementation, reviewer
 code map, required UI states, automated evidence, and AI-use disclosure, see
 [`docs/state-management.md`](docs/state-management.md).
 
+For the Saved Rooms vertical slice, local SQLite/localStorage CRUD, persistence
+test, demo steps, and reviewer code map, see
+[`docs/local-data-persistence.md`](docs/local-data-persistence.md).
+
 For local setup and Android testing, see [`docs/testing-guide.md`](docs/testing-guide.md). For VPS hosting, see [`docs/vps-deployment.md`](docs/vps-deployment.md). For the remaining route to an installable APK, see [`docs/implementation-plan.md`](docs/implementation-plan.md).
 
 ## Author
