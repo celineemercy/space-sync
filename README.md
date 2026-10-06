@@ -244,6 +244,10 @@ This project is currently under active development as part of a university mobil
 
 The MVP application, API, database migration, seed data, local Docker environment, automated checks, and VPS deployment configuration are implemented. The hosting stack provides private PostgreSQL/API networks, automatic HTTPS, explicit migrations, guarded demo seeding, backups, restore tooling, and optional protected GitHub deployment. Provisioning the actual VPS, linking the Expo project, producing the signed APK, and completing physical-device acceptance still require the project owner's infrastructure and accounts.
 
+For the two-feature TanStack Query state-management implementation, reviewer
+code map, required UI states, automated evidence, and AI-use disclosure, see
+[`docs/state-management.md`](docs/state-management.md).
+
 For local setup and Android testing, see [`docs/testing-guide.md`](docs/testing-guide.md). For VPS hosting, see [`docs/vps-deployment.md`](docs/vps-deployment.md). For the remaining route to an installable APK, see [`docs/implementation-plan.md`](docs/implementation-plan.md).
 
 ## Author
