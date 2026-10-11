@@ -167,6 +167,30 @@ describe("SearchScreen primary states", () => {
     await fireEvent.press(submit);
     expect(mockAvailability.mutate).toHaveBeenCalledTimes(1);
   });
+
+  it("shows search loading without presenting all rooms as availability results", async () => {
+    const screen = await render(<SearchScreen />);
+    await fireEvent.press(screen.getByLabelText("Search availability"));
+
+    mockAvailability.isPending = true;
+    await screen.rerender(<SearchScreen />);
+    expect(screen.getByLabelText("Searching available rooms...")).toBeTruthy();
+    expect(screen.queryByText("Campus Room")).toBeNull();
+    expect(screen.queryByText("No rooms found")).toBeNull();
+  });
+
+  it("shows search errors and retries the same request", async () => {
+    const screen = await render(<SearchScreen />);
+    await fireEvent.press(screen.getByLabelText("Search availability"));
+    const searchedInput = mockAvailability.mutate.mock.calls[0][0];
+
+    mockAvailability.error = new Error("Availability could not be loaded.");
+    await screen.rerender(<SearchScreen />);
+    expect(screen.getByText("Availability could not be loaded.")).toBeTruthy();
+    expect(screen.queryByText("Campus Room")).toBeNull();
+    await fireEvent.press(screen.getByLabelText("Try again"));
+    expect(mockAvailability.mutate).toHaveBeenLastCalledWith(searchedInput);
+  });
 });
 
 it.each(["capacity", "facility", "date", "start", "end"])(
