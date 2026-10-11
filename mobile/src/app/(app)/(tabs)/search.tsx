@@ -98,8 +98,11 @@ export default function SearchScreen() {
     router.push({ pathname: "/(app)/room/[id]", params });
   };
 
-  const searchResult = searchedInput ? availability.data : null;
-  const visibleRooms = searchResult?.rooms ?? allRooms;
+  const searchResult =
+    searchedInput && !availability.isPending && !availability.error
+      ? availability.data
+      : null;
+  const visibleRooms = searchedInput ? (searchResult?.rooms ?? []) : allRooms;
 
   const confirmSignOut = async () => {
     setIsSigningOut(true);
@@ -213,7 +216,7 @@ export default function SearchScreen() {
 
         <View style={styles.resultsHeader}>
           <Text style={styles.sectionTitle}>
-            {searchResult ? "Available rooms" : "Campus rooms"}
+            {searchedInput ? "Available rooms" : "Campus rooms"}
           </Text>
           <Text style={styles.count}>{visibleRooms.length}</Text>
         </View>
@@ -226,7 +229,9 @@ export default function SearchScreen() {
             retrying={roomsQuery.isFetching}
             onRetry={() => void roomsQuery.refetch()}
           />
-        ) : visibleRooms.length === 0 ? (
+        ) : searchedInput && availability.isPending ? (
+          <LoadingState label="Searching available rooms..." />
+        ) : searchedInput && availability.error ? null : visibleRooms.length === 0 ? (
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>No rooms found</Text>
             <Text style={styles.emptyText}>
