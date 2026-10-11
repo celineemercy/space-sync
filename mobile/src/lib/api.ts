@@ -57,7 +57,19 @@ export async function apiRequest<T>(
       },
     });
 
-    const body = (await response.json().catch(() => ({}))) as ApiErrorBody | T;
+    let body: unknown;
+    try {
+      body = await response.json();
+    } catch {
+      if (response.ok) {
+        throw new ApiClientError(
+          "The server returned invalid JSON. Please try again.",
+          response.status,
+          "INVALID_JSON",
+        );
+      }
+      body = {};
+    }
     if (!response.ok) {
       const error = body as ApiErrorBody;
       if (response.status === 401 && unauthorizedHandler) {
