@@ -1,3 +1,4 @@
+import { parseAvailability, parseRoom, parseRooms } from "@/features/rooms/model";
 import { apiRequest } from "@/lib/api";
 import { cacheRooms, getCachedRooms } from "@/storage/database";
 import type {
@@ -23,14 +24,17 @@ export interface RoomsRepository {
 }
 
 export const roomsRepository: RoomsRepository = {
-  fetchAll: (accessToken) => apiRequest<Room[]>("/rooms", {}, accessToken),
-  fetchById: (roomId, accessToken) =>
-    apiRequest<Room>(
-      `/rooms/${encodeURIComponent(roomId)}`,
-      {},
-      accessToken,
+  fetchAll: async (accessToken) =>
+    parseRooms(await apiRequest<unknown>("/rooms", {}, accessToken)),
+  fetchById: async (roomId, accessToken) =>
+    parseRoom(
+      await apiRequest<unknown>(
+        `/rooms/${encodeURIComponent(roomId)}`,
+        {},
+        accessToken,
+      ),
     ),
-  searchAvailability: (input, accessToken) => {
+  searchAvailability: async (input, accessToken) => {
     const query = new URLSearchParams({
       startsAt: input.startsAt,
       endsAt: input.endsAt,
@@ -39,10 +43,12 @@ export const roomsRepository: RoomsRepository = {
     if (input.facilityIds?.length)
       query.set("facilityIds", input.facilityIds.join(","));
 
-    return apiRequest<AvailabilityResponse>(
-      `/rooms/availability?${query}`,
-      {},
-      accessToken,
+    return parseAvailability(
+      await apiRequest<unknown>(
+        `/rooms/availability?${query}`,
+        {},
+        accessToken,
+      ),
     );
   },
   readCache: getCachedRooms,
