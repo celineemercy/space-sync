@@ -27,6 +27,7 @@ export default function AppLayout() {
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="room/[id]" options={{ title: "Room details" }} />
+      <Stack.Screen name="scan" options={{ title: "Scan room" }} />
     </Stack>
   );
 }

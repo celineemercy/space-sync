@@ -128,6 +128,8 @@ export default function SearchScreen() {
           <OfflineBanner updatedAt={roomsQuery.data.updatedAt} />
         ) : null}
 
+        <AppButton label="Scan room QR code" variant="secondary" onPress={() => router.push("/(app)/scan")} />
+
         <View style={styles.panel}>
           <View style={styles.sectionHeading}>
             <Text style={styles.sectionEyebrow}>SEARCH AVAILABILITY</Text>

@@ -33,6 +33,7 @@
         }
       ],
       "expo-secure-store",
+      ["expo-camera", { "cameraPermission": "Allow CampusSpace to scan room QR codes", "recordAudioAndroid": false }],
       "expo-sqlite",
       "@react-native-community/datetimepicker"
     ],
