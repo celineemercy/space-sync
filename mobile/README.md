@@ -2,6 +2,8 @@
 
 Expo SDK 57 / React Native Android client for CampusSpace. The app provides demo-account login, room search and filters, availability checks, room details, reservation creation, reservation cancellation, SecureStore authentication, and SQLite-backed cached reads.
 
+The Android app also supports scanning a room QR code and opt-in local reservation reminders. See [the Pertemuan 7 demo guide](../docs/pertemuan-7-mvp.md) for payload format, permissions, and review steps.
+
 ## Local setup
 
 ```bash

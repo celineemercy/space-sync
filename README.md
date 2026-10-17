@@ -4,6 +4,8 @@
 
 ## Overview
 
+Panduan implementasi dan demo Pertemuan 7: [docs/pertemuan-7-mvp.md](docs/pertemuan-7-mvp.md).
+
 CampusSpace is an Android-focused mobile application designed to help students:
 
 - Find campus rooms.
