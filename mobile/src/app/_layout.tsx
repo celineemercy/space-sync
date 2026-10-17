@@ -14,6 +14,7 @@ import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Colors, Fonts } from "@/constants/theme";
 import { AppProviders } from "@/providers/app-providers";
+import "@/features/reminders/reminders";
 
 void SplashScreen.preventAutoHideAsync();
 

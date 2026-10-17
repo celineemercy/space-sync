@@ -7,6 +7,7 @@ import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Screen } from "@/components/ui/screen";
 import { OfflineBanner, StatusMessage } from "@/components/ui/status-message";
 import { Colors, Radius, Spacing, Typography } from "@/constants/theme";
+import { ReminderButton } from "@/features/reminders/reminder-button";
 import {
   useCancelReservation,
   useReservations,
@@ -152,12 +153,12 @@ function ReservationSection({
             Until {toCampusLabel(reservation.endsAt)}
           </Text>
           {onCancel ? (
-            <AppButton
+            <><ReminderButton reservation={reservation} /><AppButton
               label="Cancel reservation"
               variant="danger"
               loading={cancellingId === reservation.id}
               onPress={() => onCancel(reservation)}
-            />
+            /></>
           ) : null}
         </View>
       ))}

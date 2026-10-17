@@ -6,6 +6,7 @@ import {
   type ReservationListResult,
 } from "@/features/reservations/use-cases";
 import { useAuth } from "@/providers/auth-provider";
+import { cancelReminder } from "@/features/reminders/reminders";
 
 export function useReservations() {
   const { accessToken, user } = useAuth();
@@ -40,7 +41,8 @@ export function useCancelReservation() {
   return useMutation({
     mutationFn: (reservationId: string) =>
       cancelReservation(reservationId, accessToken),
-    onSuccess: async () => {
+    onSuccess: async (_result, reservationId) => {
+      try { await cancelReminder(reservationId); } catch { /* Server cancellation still succeeded. */ }
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["rooms"] }),
         queryClient.invalidateQueries({ queryKey: ["reservations"] }),

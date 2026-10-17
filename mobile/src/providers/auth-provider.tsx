@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { apiRequest, setUnauthorizedHandler } from "@/lib/api";
+import { clearReminders } from "@/features/reminders/reminders";
 import {
   clearCachedReservations,
   initializeDatabase,
@@ -37,6 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     queryClient.clear();
     await clearSession();
+    try { await clearReminders(); } catch { /* Session cleanup should still finish. */ }
     if (userId) await clearCachedReservations(userId);
   }, [queryClient, user?.id]);
 
