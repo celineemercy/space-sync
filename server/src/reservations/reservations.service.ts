@@ -12,6 +12,9 @@ export class ReservationsService {
 
   async create(userId: string, input: CreateReservationDto) {
     const { startsAt, endsAt } = parseTimeRange(input.startsAt, input.endsAt);
+    if (startsAt.getTime() <= Date.now()) {
+      throw new ApiException(400, 'RESERVATION_IN_PAST', 'Choose a start time in the future.');
+    }
 
     const reservation = await this.prisma.$transaction(async (transaction) => {
       const lockedRooms = await transaction.$queryRaw<Array<{ id: string }>>`

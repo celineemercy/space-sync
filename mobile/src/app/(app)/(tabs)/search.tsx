@@ -15,6 +15,7 @@ import { useAvailabilitySearch, useRooms } from "@/features/rooms/queries";
 import {
   combineDateAndTime,
   defaultSearchRange,
+  isFutureStart,
   isValidRange,
 } from "@/lib/date-time";
 import { useAuth } from "@/providers/auth-provider";
@@ -38,6 +39,7 @@ export default function SearchScreen() {
 
   const clearSearch = () => {
     setSearchedInput(null);
+    setValidationError(null);
     availability.reset();
   };
 
@@ -68,6 +70,10 @@ export default function SearchScreen() {
     const end = combineDateAndTime(date, endsAt);
     if (!isValidRange(start, end)) {
       setValidationError("End time must be later than start time.");
+      return;
+    }
+    if (!isFutureStart(start)) {
+      setValidationError("Choose a start time in the future.");
       return;
     }
     const parsedCapacity = capacity ? Number(capacity) : undefined;

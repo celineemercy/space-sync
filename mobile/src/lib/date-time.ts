@@ -27,3 +27,7 @@ export function defaultSearchRange() {
 export function isValidRange(startsAt: Date, endsAt: Date): boolean {
   return startsAt.getTime() < endsAt.getTime();
 }
+
+export function isFutureStart(startsAt: Date, now = Date.now()): boolean {
+  return startsAt.getTime() > now;
+}

@@ -1,4 +1,4 @@
-import { combineDateAndTime, isValidRange } from "./date-time";
+import { combineDateAndTime, isFutureStart, isValidRange } from "./date-time";
 
 describe("date and time helpers", () => {
   it("combines the selected date with the selected local time", () => {
@@ -18,5 +18,11 @@ describe("date and time helpers", () => {
     expect(isValidRange(first, second)).toBe(true);
     expect(isValidRange(second, first)).toBe(false);
     expect(isValidRange(first, first)).toBe(false);
+  });
+
+  it("requires a future start time", () => {
+    const now = Date.parse("2030-01-01T09:00:00Z");
+    expect(isFutureStart(new Date("2030-01-01T10:00:00Z"), now)).toBe(true);
+    expect(isFutureStart(new Date("2030-01-01T08:00:00Z"), now)).toBe(false);
   });
 });
