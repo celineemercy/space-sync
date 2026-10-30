@@ -91,6 +91,7 @@ function PickerButton({
       <Text style={styles.label}>{label}</Text>
       <Pressable
         accessibilityRole="button"
+        accessibilityLabel={`${label}, ${value}`}
         onPress={onPress}
         style={styles.button}
       >

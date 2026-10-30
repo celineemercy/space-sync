@@ -178,6 +178,7 @@ export default function SearchScreen() {
                     <Pressable
                       key={facility.id}
                       accessibilityRole="checkbox"
+                      accessibilityLabel={facility.name}
                       accessibilityState={{ checked: selected }}
                       onPress={() => {
                         clearSearch();
@@ -218,6 +219,7 @@ export default function SearchScreen() {
           <AppButton
             label="Search availability"
             loading={availability.isPending}
+            loadingLabel="Searching rooms..."
             onPress={search}
           />
         </View>
@@ -226,7 +228,9 @@ export default function SearchScreen() {
           <Text style={styles.sectionTitle}>
             {searchedInput ? "Available rooms" : "Campus rooms"}
           </Text>
-          <Text style={styles.count}>{visibleRooms.length}</Text>
+          <Text accessibilityLiveRegion="polite" style={styles.count}>
+            {roomsQuery.isLoading || availability.isPending ? "…" : visibleRooms.length}
+          </Text>
         </View>
 
         {roomsQuery.isLoading ? (
@@ -285,6 +289,8 @@ const styles = StyleSheet.create({
   filterLabel: { ...Typography.label, color: Colors.text },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.sm },
   chip: {
+    minHeight: 44,
+    justifyContent: "center",
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: Radius.pill,

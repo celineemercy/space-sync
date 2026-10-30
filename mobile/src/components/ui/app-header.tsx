@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.xs,
-    minHeight: 38,
+    minHeight: 44,
     paddingHorizontal: Spacing.md,
     borderRadius: Radius.pill,
     backgroundColor: "rgba(255, 255, 255, 0.14)",

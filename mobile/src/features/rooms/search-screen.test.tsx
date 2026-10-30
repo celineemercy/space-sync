@@ -164,6 +164,7 @@ describe("SearchScreen primary states", () => {
       busy: true,
       disabled: true,
     });
+    expect(screen.getByText("Searching rooms...")).toBeTruthy();
     await fireEvent.press(submit);
     expect(mockAvailability.mutate).toHaveBeenCalledTimes(1);
   });

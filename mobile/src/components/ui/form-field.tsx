@@ -1,3 +1,4 @@
+import { useId } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,16 +11,24 @@ import { Colors, Radius, Spacing, Typography } from "@/constants/theme";
 type Props = TextInputProps & { label: string; error?: string };
 
 export function FormField({ label, error, style, ...props }: Props) {
+  const errorId = `${useId()}-error`;
   return (
     <View style={styles.wrapper}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
         accessibilityLabel={label}
+        accessibilityHint={error}
+        aria-describedby={error ? errorId : undefined}
+        aria-invalid={Boolean(error)}
         placeholderTextColor={Colors.textMuted}
         style={[styles.input, error && styles.inputError, style]}
         {...props}
       />
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? (
+        <Text nativeID={errorId} accessibilityLiveRegion="polite" style={styles.error}>
+          {error}
+        </Text>
+      ) : null}
     </View>
   );
 }

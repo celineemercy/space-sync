@@ -89,7 +89,12 @@ export default function LoginScreen() {
         {errors.root?.message ? (
           <StatusMessage error={new Error(errors.root.message)} />
         ) : null}
-        <AppButton label="Sign in" loading={isSubmitting} onPress={submit} />
+        <AppButton
+          label="Sign in"
+          loading={isSubmitting}
+          loadingLabel="Signing in..."
+          onPress={submit}
+        />
       </View>
     </Screen>
   );
@@ -97,6 +102,7 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   screen: {
+    maxWidth: 520,
     flexGrow: 1,
     justifyContent: "center",
     paddingVertical: Spacing.xxl,

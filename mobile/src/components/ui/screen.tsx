@@ -1,4 +1,6 @@
 import {
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   View,
@@ -23,22 +25,34 @@ export function Screen({
 }: Props) {
   return (
     <SafeAreaView edges={["bottom"]} style={styles.safe}>
-      {scroll ? (
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={[styles.content, style, contentContainerStyle]}
-        >
-          {children}
-        </ScrollView>
-      ) : (
-        <View style={[styles.content, styles.flex, style]}>{children}</View>
-      )}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.flex}
+      >
+        {scroll ? (
+          <ScrollView
+            keyboardDismissMode="on-drag"
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={[styles.content, style, contentContainerStyle]}
+          >
+            {children}
+          </ScrollView>
+        ) : (
+          <View style={[styles.content, styles.flex, style]}>{children}</View>
+        )}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
-  content: { padding: Spacing.lg, gap: Spacing.lg },
+  content: {
+    width: "100%",
+    maxWidth: 960,
+    alignSelf: "center",
+    padding: Spacing.lg,
+    gap: Spacing.lg,
+  },
   flex: { flex: 1 },
 });

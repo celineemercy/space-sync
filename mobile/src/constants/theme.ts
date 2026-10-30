@@ -8,9 +8,9 @@ export const Colors = {
   text: "#171717",
   textMuted: "#666666",
   border: "#D8D8D8",
-  danger: "#EC1C24",
+  danger: "#B4232A",
   dangerSurface: "#FDE8E9",
-  warning: "#F26E21",
+  warning: "#9A3E0A",
   warningSurface: "#FFF0E6",
   successSurface: "#E5F2EA",
 } as const;

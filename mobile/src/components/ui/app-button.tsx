@@ -10,12 +10,14 @@ import { Colors, Radius, Spacing, Typography } from "@/constants/theme";
 type Props = PressableProps & {
   label: string;
   loading?: boolean;
+  loadingLabel?: string;
   variant?: "primary" | "secondary" | "danger";
 };
 
 export function AppButton({
   label,
   loading,
+  loadingLabel,
   variant = "primary",
   disabled,
   style,
@@ -41,14 +43,16 @@ export function AppButton({
       {loading ? (
         <ActivityIndicator
           color={variant === "primary" ? "#FFFFFF" : Colors.primary}
+          size="small"
+          style={styles.spinner}
         />
-      ) : (
-        <Text
-          style={[styles.label, variant !== "primary" && styles.secondaryLabel]}
-        >
-          {label}
-        </Text>
-      )}
+      ) : null}
+      <Text
+        accessibilityLiveRegion="polite"
+        style={[styles.label, variant !== "primary" && styles.secondaryLabel]}
+      >
+        {loading ? (loadingLabel ?? `${label}...`) : label}
+      </Text>
     </Pressable>
   );
 }
@@ -60,6 +64,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     alignItems: "center",
     justifyContent: "center",
+    flexDirection: "row",
     borderWidth: 1,
   },
   primary: { backgroundColor: Colors.primary, borderColor: Colors.primary },
@@ -70,6 +75,7 @@ const styles = StyleSheet.create({
   },
   pressed: { opacity: 0.82 },
   disabled: { opacity: 0.55 },
+  spinner: { marginRight: Spacing.sm },
   label: { ...Typography.bodyStrong, color: "#FFFFFF" },
   secondaryLabel: { color: Colors.text },
 });

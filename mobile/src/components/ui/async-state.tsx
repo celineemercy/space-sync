@@ -7,6 +7,7 @@ export function LoadingState({ label = "Loading..." }: { label?: string }) {
   return (
     <View
       accessibilityLabel={label}
+      accessibilityLiveRegion="polite"
       accessibilityRole="progressbar"
       style={styles.loading}
       testID="loading-state"
