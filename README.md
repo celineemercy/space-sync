@@ -1,265 +1,83 @@
 # CampusSpace
 
-> A smart campus room availability and reservation system.
+CampusSpace is a campus room discovery and reservation app built for Android. Students can find suitable rooms, check schedule-aware availability, reserve a room, and manage their bookings.
 
-## Overview
+## Features
 
-Panduan implementasi dan demo Pertemuan 7: [docs/pertemuan-7-mvp.md](docs/pertemuan-7-mvp.md).
-
-CampusSpace is an Android-focused mobile application designed to help students:
-
-- Find campus rooms.
-- Check room availability for a selected date and time.
-- Filter rooms by capacity and available facilities.
-- Reserve suitable rooms.
-- Avoid scheduling conflicts.
-- View and manage their reservations.
-
-The project is intended to explore real-world mobile development, backend architecture, database design, and the business logic required for a reliable reservation system.
-
-## Problem
-
-Students may have difficulty knowing which campus rooms are available or suitable for individual and group activities. Room details, schedules, and availability can be distributed across different sources, making it inefficient to discover an appropriate space and arrange a reservation.
-
-## Proposed Solution
-
-CampusSpace will provide a simple, schedule-aware reservation flow:
-
-```text
-Search by date and time
-        ↓
-View available rooms
-        ↓
-Filter by capacity and facilities
-        ↓
-View room details
-        ↓
-Create a reservation
-        ↓
-Backend validates availability
-        ↓
-Reservation confirmed
-        ↓
-QR check-in (later development phase)
-```
-
-## Ruang Lingkup Proyek (12 Pertemuan)
-
-Bagian ini menetapkan ruang lingkup CampusSpace yang realistis untuk dikerjakan selama 12 pertemuan. Fokus pengembangan adalah alur utama pencarian ruang dan reservasi; fitur lanjutan tetap menjadi rencana pengembangan setelah MVP selesai.
-
-### Deskripsi Masalah
-
-Mahasiswa sering kesulitan mengetahui ruang kampus yang tersedia dan sesuai untuk belajar atau melakukan kegiatan kelompok pada waktu tertentu. Informasi ruang, kapasitas, fasilitas, dan jadwal penggunaan dapat tersebar di beberapa sumber sehingga mahasiswa perlu mencari dan mencocokkannya secara manual. CampusSpace dirancang untuk menyatukan informasi tersebut dan menyediakan proses reservasi yang memeriksa benturan jadwal.
-
-### Profil Target Pengguna
-
-Target pengguna utama CampusSpace adalah mahasiswa yang membutuhkan ruang kampus untuk belajar mandiri, diskusi kelompok, rapat organisasi, atau kegiatan akademik lainnya. Pengguna diasumsikan memiliki perangkat Android, akun yang dapat digunakan untuk masuk, serta akses internet untuk mencari ketersediaan dan membuat reservasi.
-
-### Manfaat Aplikasi
-
-- Mempermudah mahasiswa menemukan ruang yang sesuai tanpa memeriksa banyak sumber informasi.
-- Menampilkan ketersediaan ruang berdasarkan tanggal dan waktu yang dipilih.
-- Membantu pengguna memilih ruang berdasarkan kapasitas dan fasilitas yang dibutuhkan.
-- Mengurangi risiko reservasi ganda melalui validasi jadwal pada backend.
-- Menyediakan satu tempat untuk melihat dan mengelola reservasi milik pengguna.
-
-### Daftar Fitur Inti
-
-Fitur berikut menjadi target MVP selama 12 pertemuan:
-
-- Autentikasi pengguna dasar.
-- Daftar ruang dan detail ruang.
-- Pemilihan tanggal serta rentang waktu.
-- Pencarian ketersediaan yang mempertimbangkan jadwal kelas dan reservasi yang sudah ada.
-- Filter berdasarkan kapasitas dan fasilitas.
-- Pembuatan reservasi dengan validasi konflik pada backend.
-- Halaman **My Reservations** untuk melihat reservasi pengguna.
-- Pembatalan reservasi.
-- Penyimpanan lokal untuk data penting dan penanganan dasar ketika jaringan bermasalah.
-
-### Fitur yang Tidak Dikerjakan
-
-Fitur berikut tidak termasuk dalam target 12 pertemuan dan hanya menjadi rencana pengembangan lanjutan:
-
-- Check-in menggunakan QR code.
-- Pelepasan reservasi otomatis ketika pengguna tidak hadir.
-- Pembaruan ketersediaan ruang secara real-time.
-- Push notification.
-- Pengelolaan status pemeliharaan atau pemblokiran ruang melalui aplikasi admin.
-- Riwayat penggunaan ruang dan analitik.
-- Rekomendasi ruang cerdas.
-- Integrasi dengan sistem akademik kampus yang sebenarnya.
-- Rilis produksi untuk iOS atau publikasi ke app store.
-
-### Kriteria Aplikasi Dinyatakan Berhasil
-
-MVP CampusSpace dinyatakan berhasil apabila skenario berikut dapat didemonstrasikan pada perangkat Android atau emulator:
-
-1. Pengguna dapat masuk ke aplikasi dan melihat daftar serta detail ruang.
-2. Pengguna dapat memilih tanggal dan waktu, lalu memfilter ruang berdasarkan kapasitas atau fasilitas.
-3. Sistem hanya menampilkan ruang yang tidak memiliki benturan dengan jadwal kelas atau reservasi lain pada waktu yang dipilih.
-4. Reservasi yang valid dapat disimpan dan ditampilkan pada halaman **My Reservations**.
-5. Backend menolak reservasi yang waktunya bertabrakan untuk ruang yang sama.
-6. Pengguna dapat membatalkan reservasi miliknya dan status ketersediaan diperbarui dengan benar.
-7. Aplikasi menangani kegagalan jaringan secara wajar tanpa berhenti secara tiba-tiba serta dapat menggunakan data penting yang telah disimpan secara lokal.
-8. Alur utama—masuk, mencari ruang, membuat reservasi, melihat reservasi, dan membatalkan reservasi—dapat diselesaikan tanpa kesalahan yang menghalangi pengguna.
-
-## Key Features
-
-The MVP features below are implemented on the `dev` branch and are being prepared for Android device acceptance testing.
-
-### Core / MVP
-
-- Authentication
-- Room listing
-- Room details
-- Date and time selection
-- Schedule-aware room availability
-- Capacity and facility filters
-- Reservation creation
+- User authentication
+- Room listing, details, and saved rooms
+- Date, time, capacity, and facility filters
+- Schedule-aware availability checks
+- Reservation creation and cancellation
 - Booking conflict prevention
-- My Reservations
-- Reservation cancellation
-- Local data caching
-
-### Planned / Advanced
-
-- QR-based room check-in
-- Automatic release of no-show reservations
-- Real-time room availability updates
-- Push notifications
-- Room maintenance and blocking status
-- Room usage history
-- Smart room recommendations
-
-## Technical Challenges
-
-CampusSpace is intended to address several practical engineering problems:
-
-- Detecting overlapping reservations accurately.
-- Preventing concurrent users from double-booking a room.
-- Enforcing booking rules and final availability checks on the server.
-- Synchronizing state between the mobile application and backend API.
-- Supporting local caching and graceful handling of network failures.
-- Managing the reservation lifecycle, including confirmation, cancellation, check-in, expiration, and no-shows.
-- Implementing secure authentication and role-based authorization.
-- Integrating QR codes and device capabilities for future check-in workflows.
+- QR room scanning and local reminders
+- Offline caching for important data
 
 ## Tech Stack
 
-| Area | Technologies |
-| --- | --- |
-| Mobile | React Native, Expo, TypeScript |
-| Backend | NestJS, TypeScript, Prisma |
-| Database | PostgreSQL (server), SQLite (mobile/local persistence) |
-| Development | Git, GitHub, Android Studio Emulator, Postman or Bruno |
-
-## Architecture
-
-The architecture separates the mobile client, local cache, backend API, and primary database:
-
-```mermaid
-flowchart LR
-    subgraph Mobile[Mobile App]
-        App[React Native + Expo]
-        Cache[(SQLite / Local Cache)]
-        App <--> Cache
-    end
-
-    App <-->|REST API| API[NestJS Backend]
-    API <-->|Prisma| DB[(PostgreSQL)]
-```
-
-The mobile application will use SQLite for local persistence and cached data. The NestJS backend will remain the authoritative source for reservations and communicate with PostgreSQL through Prisma.
-
-## Reservation Logic
-
-A new reservation conflicts with an existing reservation for the same room when both conditions are true:
-
-```text
-newStart < existingEnd
-AND
-newEnd > existingStart
-```
-
-This rule detects partial overlaps, reservations contained within another reservation, and reservations that contain an existing booking. Adjacent reservations—where one starts exactly when another ends—do not conflict under this rule.
-
-The mobile client may perform an early availability check for a responsive user experience, but the final conflict validation must happen on the backend. Server-side validation is necessary because availability can change between the initial search and reservation submission.
-
-## Database Entities
-
-The implemented MVP domain model includes:
-
-- `User`
-- `Room`
-- `Facility`
-- `RoomFacility`
-- `ClassSchedule`
-- `Reservation`
-
-`CheckIn`, `RoomBlock`, and `Notification` remain outside the MVP.
-
-These entities may evolve as requirements and reservation rules are refined.
+- **Mobile:** React Native, Expo, TypeScript, SQLite
+- **API:** NestJS, TypeScript, Prisma
+- **Database:** PostgreSQL
+- **Development:** Docker Compose, Jest, Vitest
 
 ## Project Structure
 
-The repository uses this lightweight monorepo structure:
-
 ```text
-campus-space/
-├── mobile/                 # Expo / React Native Android client
-├── server/                 # NestJS API, Prisma schema, migrations, seed
-├── docs/                   # Architecture, ADRs, plans, testing guide
-├── docker-compose.yml      # Local PostgreSQL and API
-└── README.md
+space-sync/
+├── mobile/    # Expo mobile app and web preview
+├── server/    # NestJS API, Prisma schema, and migrations
+├── deploy/    # VPS deployment configuration
+├── docs/      # Architecture, testing, and deployment guides
+└── docker-compose.yml
 ```
 
-## Development Roadmap
+## Quick Start
 
-1. **Phase 1 — Research, requirements, and UI flow**
-2. **Phase 2 — Mobile UI and navigation**
-3. **Phase 3 — State management and local persistence**
-4. **Phase 4 — NestJS API and PostgreSQL integration**
-5. **Phase 5 — Reservation and conflict logic**
-6. **Phase 6 — QR check-in and notifications**
-7. **Phase 7 — Testing, APK build, and release**
+1. Copy the environment template and replace its placeholder values:
 
-## Learning Objectives
+   ```powershell
+   Copy-Item .env.example .env
+   ```
 
-Through this project, I aim to learn and practise:
+2. Start PostgreSQL, the API, and the web preview:
 
-- Mobile application development.
-- React Native architecture.
-- TypeScript.
-- API integration.
-- Backend development with NestJS.
-- PostgreSQL database modelling.
-- Mobile local persistence.
-- Authentication and authorization.
-- Software testing.
-- Git and GitHub workflows.
-- Deployment and release of an Android APK.
+   ```bash
+   docker compose --profile full up -d --build
+   docker compose --profile full exec server npm run db:seed
+   ```
+
+3. Open the web preview at `http://localhost:8081`.
+
+For Android development, start the services above, then run:
+
+```bash
+cd mobile
+npm ci
+npm start
+```
+
+## Quality Checks
+
+Run these commands in both `mobile/` and `server/`:
+
+```bash
+npm ci
+npm run typecheck
+npm run lint
+npm test
+```
+
+The server also supports `npm run build` and `npm run test:smoke`.
+
+## Documentation
+
+- [Testing and APK readiness](docs/testing-guide.md)
+- [Architecture](docs/architecture-plan.md)
+- [State management](docs/state-management.md)
+- [Local data persistence](docs/local-data-persistence.md)
+- [VPS deployment](docs/vps-deployment.md)
+- [Implementation plan](docs/implementation-plan.md)
 
 ## Status
 
-This project is currently under active development as part of a university mobile programming course.
-
-The MVP application, API, database migration, seed data, local Docker environment, automated checks, and VPS deployment configuration are implemented. The hosting stack provides private PostgreSQL/API networks, automatic HTTPS, explicit migrations, guarded demo seeding, backups, restore tooling, and optional protected GitHub deployment. Provisioning the actual VPS, linking the Expo project, producing the signed APK, and completing physical-device acceptance still require the project owner's infrastructure and accounts.
-
-For the two-feature TanStack Query state-management implementation, reviewer
-code map, required UI states, automated evidence, and AI-use disclosure, see
-[`docs/state-management.md`](docs/state-management.md).
-
-For the Saved Rooms vertical slice, local SQLite/localStorage CRUD, persistence
-test, demo steps, and reviewer code map, see
-[`docs/local-data-persistence.md`](docs/local-data-persistence.md).
-
-For local setup and Android testing, see [`docs/testing-guide.md`](docs/testing-guide.md). For VPS hosting, see [`docs/vps-deployment.md`](docs/vps-deployment.md). For the remaining route to an installable APK, see [`docs/implementation-plan.md`](docs/implementation-plan.md).
-
-## Author
-
-Developed as a Computer Science mobile development project.
-
-## License
-
-License information will be added later.
+The MVP is under active development. The mobile app, API, database migrations, automated checks, local Docker environment, and deployment configuration are implemented. A signed APK and final physical-device acceptance testing still require the project owner's Expo and hosting accounts.
