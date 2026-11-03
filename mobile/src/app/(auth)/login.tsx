@@ -1,38 +1,11 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { Controller, useForm } from "react-hook-form";
 import { StyleSheet, Text, View } from "react-native";
-import { AppButton } from "@/components/ui/app-button";
-import { FormField } from "@/components/ui/form-field";
 import { Screen } from "@/components/ui/screen";
-import { StatusMessage } from "@/components/ui/status-message";
-import { Colors, Radius, Spacing, Typography } from "@/constants/theme";
-import { loginSchema, type LoginInput } from "@/features/auth/validation";
-import { useAuth } from "@/providers/auth-provider";
+import { Colors, Spacing, Typography } from "@/constants/theme";
+import { LoginForm } from "@/features/auth/login-form";
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { signIn } = useAuth();
-  const {
-    control,
-    handleSubmit,
-    setError,
-    formState: { errors, isSubmitting },
-  } = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "student@example.test", password: "" },
-  });
-
-  const submit = handleSubmit(async (values) => {
-    try {
-      await signIn(values.email, values.password);
-      router.replace("/(app)/(tabs)/search");
-    } catch (error) {
-      setError("root", {
-        message: error instanceof Error ? error.message : "Unable to sign in.",
-      });
-    }
-  });
 
   return (
     <Screen contentContainerStyle={styles.screen}>
@@ -46,49 +19,7 @@ export default function LoginScreen() {
         </Text>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Student sign in</Text>
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onBlur, onChange, value } }) => (
-            <FormField
-              label="Email"
-              value={value}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              autoComplete="email"
-              error={errors.email?.message}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onBlur, onChange, value } }) => (
-            <FormField
-              label="Password"
-              value={value}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              secureTextEntry
-              autoComplete="password"
-              error={errors.password?.message}
-            />
-          )}
-        />
-        {errors.root?.message ? (
-          <StatusMessage error={new Error(errors.root.message)} />
-        ) : null}
-        <AppButton
-          label="Sign in"
-          loading={isSubmitting}
-          loadingLabel="Signing in..."
-          onPress={submit}
-        />
-      </View>
+      <LoginForm onSuccess={() => router.replace("/(app)/(tabs)/search")} />
     </Screen>
   );
 }
@@ -116,13 +47,4 @@ const styles = StyleSheet.create({
     textAlign: "center",
     ...Typography.body,
   },
-  card: {
-    backgroundColor: Colors.surface,
-    padding: Spacing.xl,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    gap: Spacing.lg,
-  },
-  cardTitle: { ...Typography.title, color: Colors.text },
 });
