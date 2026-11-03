@@ -7,14 +7,15 @@ import {
   useMemo,
   useState,
 } from "react";
-import { apiRequest, setUnauthorizedHandler } from "@/lib/api";
+import { setUnauthorizedHandler } from "@/lib/api";
+import { authRepository } from "@/features/auth/repository";
 import { clearReminders } from "@/features/reminders/reminders";
 import {
   clearCachedReservations,
   initializeDatabase,
 } from "@/storage/database";
 import { clearSession, loadSession, saveSession } from "@/storage/session";
-import type { LoginResponse, User } from "@/types/domain";
+import type { User } from "@/types/domain";
 
 type AuthContextValue = {
   accessToken: string | null;
@@ -64,10 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [accessToken, signOut]);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const session = await apiRequest<LoginResponse>("/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
+    const session = await authRepository.signIn({ email, password });
     await saveSession(session.accessToken, session.user);
     setAccessToken(session.accessToken);
     setUser(session.user);
