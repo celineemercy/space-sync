@@ -2,20 +2,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import { StyleSheet, Text, View } from "react-native";
-import { z } from "zod";
 import { AppButton } from "@/components/ui/app-button";
 import { FormField } from "@/components/ui/form-field";
 import { Screen } from "@/components/ui/screen";
 import { StatusMessage } from "@/components/ui/status-message";
 import { Colors, Radius, Spacing, Typography } from "@/constants/theme";
+import { loginSchema, type LoginInput } from "@/features/auth/validation";
 import { useAuth } from "@/providers/auth-provider";
-
-const loginSchema = z.object({
-  email: z.string().trim().email("Enter a valid email address."),
-  password: z.string().min(8, "Password must contain at least 8 characters."),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -25,7 +18,7 @@ export default function LoginScreen() {
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm<LoginForm>({
+  } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "student@example.test", password: "" },
   });
