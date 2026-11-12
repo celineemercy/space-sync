@@ -53,13 +53,15 @@ export default function ScanRoomScreen() {
         </View>
       ) : (
         <View style={styles.panel}>
-          <CameraView
-            style={styles.camera}
-            facing="back"
-            barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
-            onBarcodeScanned={scanError ? undefined : ({ data }) => onScan(data)}
-            onMountError={({ message }) => setCameraError(message)}
-          />
+          <View style={styles.cameraFrame}>
+            <CameraView
+              style={styles.camera}
+              facing="back"
+              barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+              onBarcodeScanned={scanError ? undefined : ({ data }) => onScan(data)}
+              onMountError={({ message }) => setCameraError(message)}
+            />
+          </View>
           {scanError ? (
             <View style={styles.message}>
               <Text style={styles.help}>{scanError}</Text>
@@ -80,6 +82,7 @@ const styles = StyleSheet.create({
   title: { ...Typography.headline, color: Colors.text },
   help: { ...Typography.body, color: Colors.textMuted },
   panel: { padding: Spacing.md, gap: Spacing.md, borderRadius: Radius.lg, backgroundColor: Colors.surface },
-  camera: { height: 360, borderRadius: Radius.lg, overflow: "hidden" },
+  cameraFrame: { height: 360, width: "100%", borderRadius: Radius.lg, overflow: "hidden" },
+  camera: { flex: 1 },
   message: { gap: Spacing.md },
 });
