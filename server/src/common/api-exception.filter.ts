@@ -23,7 +23,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
 
     if (!(exception instanceof HttpException)) {
       this.logger.error(
-        `Unhandled error on ${request.method} ${request.url}`,
+        `Unhandled error on ${request.method} ${request.route?.path ?? 'unmatched'}`,
         exception,
       );
     }

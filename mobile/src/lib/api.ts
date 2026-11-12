@@ -1,3 +1,5 @@
+import { logRuntime } from "./runtime-log";
+
 type ApiErrorBody = {
   statusCode?: number;
   code?: string;
@@ -42,6 +44,9 @@ export async function apiRequest<T>(
   options: RequestInit = {},
   accessToken?: string | null,
 ): Promise<T> {
+  const startedAt = Date.now();
+  const method = options.method ?? "GET";
+  const route = path.split("?")[0].replace(/\/[0-9a-f-]{20,}(?=\/|$)/gi, "/:id");
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12_000);
 
@@ -83,16 +88,22 @@ export async function apiRequest<T>(
       );
     }
 
+    logRuntime("info", "api_request", { method, route, status: response.status, durationMs: Date.now() - startedAt });
     return body as T;
   } catch (error: unknown) {
-    if (error instanceof ApiClientError) throw error;
+    if (error instanceof ApiClientError) {
+      logRuntime("warn", "api_request_failed", { method, route, status: error.statusCode, code: error.code, durationMs: Date.now() - startedAt });
+      throw error;
+    }
     if (error instanceof Error && error.name === "AbortError") {
+      logRuntime("warn", "api_request_failed", { method, route, code: "NETWORK_TIMEOUT", durationMs: Date.now() - startedAt });
       throw new ApiClientError(
         "The request timed out. Please try again.",
         0,
         "NETWORK_TIMEOUT",
       );
     }
+    logRuntime("warn", "api_request_failed", { method, route, code: "NETWORK_ERROR", durationMs: Date.now() - startedAt });
     throw new ApiClientError(
       "Unable to reach CampusSpace. Check your connection.",
       0,

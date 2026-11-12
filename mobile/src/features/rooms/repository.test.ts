@@ -64,18 +64,23 @@ describe("room model and API repository", () => {
   });
 
   it("accepts an empty availability result from the API", async () => {
+    const info = jest.spyOn(console, "info").mockImplementation(() => {});
     mockResponse(200, { ...searchInput, rooms: [] });
 
-    await expect(roomsRepository.searchAvailability(searchInput)).resolves.toEqual({
-      startsAt: searchInput.startsAt,
-      endsAt: searchInput.endsAt,
-      rooms: [],
-    });
-    expect(fetchMock.mock.calls[0][0]).toContain(
-      "/rooms/availability?startsAt=",
-    );
-    expect(fetchMock.mock.calls[0][0]).toContain("minCapacity=4");
-    expect(fetchMock.mock.calls[0][0]).toContain("facilityIds=projector");
+    try {
+      await expect(roomsRepository.searchAvailability(searchInput)).resolves.toEqual({
+        startsAt: searchInput.startsAt,
+        endsAt: searchInput.endsAt,
+        rooms: [],
+      });
+      expect(fetchMock.mock.calls[0][0]).toContain("/rooms/availability?startsAt=");
+      expect(fetchMock.mock.calls[0][0]).toContain("minCapacity=4");
+      expect(fetchMock.mock.calls[0][0]).toContain("facilityIds=projector");
+      expect(info).toHaveBeenCalledWith(expect.stringContaining('"route":"/rooms/availability"'));
+      expect(info.mock.calls.join(" ")).not.toContain(searchInput.startsAt);
+    } finally {
+      info.mockRestore();
+    }
   });
 
   it("surfaces HTTP failure from the API", async () => {

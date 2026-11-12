@@ -148,4 +148,10 @@ adb install -r CampusSpace.apk
 
 ## 7. Release Evidence
 
+### Runtime logs
+
+The Android app writes `[CampusSpace]` API events to the device log. They include the method, route, status or error code, and duration. Query values, request bodies, and access tokens are not logged. For a USB-connected test device, collect them with `adb logcat` and filter for `CampusSpace`. The API writes one `HttpRequest` event per completed request, and its exception filter records unexpected failures. On a Compose deployment, inspect the API with `docker compose logs server` (add the deployment's profile and compose file options as needed).
+
+Record the test time and the corresponding app and API log lines when reporting a failure. Avoid attaching unfiltered device logs because other apps can write sensitive data there.
+
 Record the Git commit, EAS build ID and URL, APK checksum, device model, Android version, test date, API release URL, acceptance results, and known limitations. Never record passwords, JWTs, database credentials, or signing material.
