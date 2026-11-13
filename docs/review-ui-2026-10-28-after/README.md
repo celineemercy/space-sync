@@ -1,4 +1,4 @@
-# Review UI CampusSpace — 28 Oktober 2026
+# Review UI space-sync — 28 Oktober 2026
 
 Reviewer menjalankan preview web Expo dengan API NestJS dan PostgreSQL lokal berisi data demo. Ukuran yang diperiksa: desktop 1280 × 800, ponsel 390 × 844, dan viewport ponsel 390 × 500 untuk simulasi area yang tersisa saat keyboard muncul.
 

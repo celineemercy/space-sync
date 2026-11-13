@@ -8,7 +8,7 @@ The assignment mentions Flutter and Riverpod as an example. This repository is
 an Expo/React Native application, so the implementation uses the equivalent
 responsibility split below:
 
-| Flutter/Riverpod concept | CampusSpace implementation |
+| Flutter/Riverpod concept | space-sync implementation |
 | --- | --- |
 | `ConsumerWidget` / page | Expo Router screen components |
 | `Notifier` / provider | TanStack Query hooks in `queries.ts` |

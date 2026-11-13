@@ -1,8 +1,8 @@
-# CampusSpace Architecture Plan
+# space-sync Architecture Plan
 
 ## Document Status
 
-This document describes the planned architecture for the CampusSpace minimum viable product (MVP). The repository is currently in the planning stage; the components, interfaces, and data models below are design decisions, not completed functionality.
+This document describes the planned architecture for the space-sync minimum viable product (MVP). The repository is currently in the planning stage; the components, interfaces, and data models below are design decisions, not completed functionality.
 
 The MVP is scoped for a 12-meeting university mobile programming course. Its primary goal is to deliver a reliable end-to-end flow for finding an available campus room and managing a reservation.
 
@@ -39,15 +39,15 @@ The MVP is scoped for a 12-meeting university mobile programming course. Its pri
 
 ## 2. Architecture Overview
 
-CampusSpace uses a client-server architecture. The Expo mobile application communicates with a versioned NestJS REST API. The backend owns authentication, availability rules, authorization, and reservation conflict detection. Prisma provides access to PostgreSQL. SQLite stores selected mobile data for faster loading and limited offline viewing.
+space-sync uses a client-server architecture. The Expo mobile application communicates with a versioned NestJS REST API. The backend owns authentication, availability rules, authorization, and reservation conflict detection. Prisma provides access to PostgreSQL. SQLite stores selected mobile data for faster loading and limited offline viewing.
 
 ### System Context
 
 ```mermaid
 flowchart LR
     Student[Student]
-    App[CampusSpace Mobile App]
-    API[CampusSpace REST API]
+    App[space-sync Mobile App]
+    API[space-sync REST API]
     DB[(PostgreSQL)]
 
     Student -->|Searches and manages reservations| App
@@ -88,7 +88,7 @@ flowchart LR
 ## 3. Planned Repository Structure
 
 ```text
-campus-space/
+space-sync/
 ├── mobile/
 │   ├── app/                 # Expo Router routes
 │   ├── src/

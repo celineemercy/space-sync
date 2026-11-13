@@ -1,8 +1,8 @@
-# CampusSpace Step-by-Step Implementation Plan
+# space-sync Step-by-Step Implementation Plan
 
 ## Document Status
 
-This document is the implementation checklist for the CampusSpace MVP. It starts from the original documentation-only repository and ends with an installable Android APK that communicates with a reachable NestJS API.
+This document is the implementation checklist for the space-sync MVP. It starts from the original documentation-only repository and ends with an installable Android APK that communicates with a reachable NestJS API.
 
 ## Current Implementation Status
 
@@ -12,7 +12,7 @@ The remaining release steps need project-owner resources that are intentionally 
 
 ## 1. Definition of Done
 
-CampusSpace is ready for its course demonstration when all of the following are true:
+space-sync is ready for its course demonstration when all of the following are true:
 
 - A student can sign in with a seeded demo account.
 - The Android app can list rooms and show room details.
@@ -96,7 +96,7 @@ Turn the architecture decisions into a small set of stable MVP contracts before 
 6. Use seeded demo users instead of public registration.
 7. Use `CONFIRMED` and `CANCELLED` as the initial reservation statuses.
 8. Adopt `/api/v1` as the REST API prefix.
-9. Reserve `com.celineemercy.campusspace` as the Android application ID. Change it before the first EAS build if a different permanent ID is required; do not change it after distribution begins.
+9. Reserve `com.celineemercy.spacesync` as the Android application ID. Change it before the first EAS build if a different permanent ID is required; do not change it after distribution begins.
 10. Create a short pull-request checklist covering secrets, migrations, tests, and documentation.
 
 ### Exit Criteria
@@ -139,7 +139,7 @@ Create the two TypeScript applications without introducing unnecessary monorepo 
    ```dotenv
    NODE_ENV=development
    PORT=3000
-   DATABASE_URL=postgresql://USER:PASSWORD@localhost:5433/campus_space
+   DATABASE_URL=postgresql://USER:PASSWORD@localhost:5433/space_sync
    JWT_SECRET=replace-with-a-long-random-value
    JWT_EXPIRES_IN=1h
    CAMPUS_TIMEZONE=Asia/Jakarta
@@ -299,9 +299,9 @@ Create the mobile navigation, API client, secure session handling, and login exp
 1. Create `feature/mobile-auth` from `dev`.
 2. Configure Expo Router groups for authenticated and unauthenticated routes.
 3. Configure application metadata:
-   - name: `CampusSpace`
-   - slug: `campus-space`
-   - Android package: `com.celineemercy.campusspace`
+   - name: `space-sync`
+   - slug: `space-sync`
+   - Android package: `com.celineemercy.spacesync`
    - portrait orientation unless the UI requires otherwise
 4. Add TanStack Query and provide one query client at the application root.
 5. Create one typed fetch wrapper that:
@@ -634,10 +634,10 @@ Configure a signed internal-distribution APK that uses the hosted API.
    ```
 
 4. Confirm `app.json` or `app.config.ts` contains:
-   - `name`: `CampusSpace`
-   - `slug`: `campus-space`
+   - `name`: `space-sync`
+   - `slug`: `space-sync`
    - semantic application version
-   - Android package: `com.celineemercy.campusspace`
+   - Android package: `com.celineemercy.spacesync`
    - final icon, adaptive icon, and splash configuration
 5. Use EAS-managed Android signing credentials for the MVP. Do not download or commit the keystore.
 6. Configure the public API URL for the EAS `preview` environment:
@@ -718,7 +718,7 @@ Produce the signed APK and prove it works outside the development environment.
 8. Install on an emulator or connected device, for example:
 
    ```bash
-   adb install -r CampusSpace.apk
+   adb install -r space-sync.apk
    ```
 
 9. Test a clean installation with no Metro bundler or development server running.

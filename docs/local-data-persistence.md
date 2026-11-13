@@ -11,9 +11,9 @@ ruang tersimpan, mengubah catatan pribadi, dan menghapus ruang tersebut.
 Penyimpanan disesuaikan dengan platform:
 
 - Android/iOS menggunakan SQLite melalui `expo-sqlite` dengan database
-  `campus-space.db` dan tabel `saved_rooms`.
+  `space-sync.db` dan tabel `saved_rooms`.
 - Web/PWA menggunakan `window.localStorage` dengan key
-  `campus-space.saved-rooms.v1`.
+  `space-sync.saved-rooms.v1`.
 
 Data ini bersifat lokal pada device/browser dan tidak dikirim ke backend.
 SQLite mempertahankan database setelah aplikasi ditutup dan dibuka kembali,

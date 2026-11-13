@@ -5,7 +5,7 @@
 
 ## Context
 
-CampusSpace must deliver a complete mobile reservation flow within a 12-meeting course. Independent services would add deployment, observability, and consistency work without helping the MVP.
+space-sync must deliver a complete mobile reservation flow within a 12-meeting course. Independent services would add deployment, observability, and consistency work without helping the MVP.
 
 ## Decision
 
