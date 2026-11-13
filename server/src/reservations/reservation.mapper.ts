@@ -5,6 +5,13 @@ type ReservationRecord = {
   status: string;
   cancelledAt: Date | null;
   createdAt: Date;
+  decidedAt: Date | null;
+  decidedById: string | null;
+  rejectionReason: string | null;
+  documentKey: string | null;
+  documentName: string | null;
+  documentMime: string | null;
+  documentSize: number | null;
   room: {
     id: string;
     code: string;
@@ -22,6 +29,10 @@ export function toReservationDto(reservation: ReservationRecord) {
     status: reservation.status,
     cancelledAt: reservation.cancelledAt?.toISOString() ?? null,
     createdAt: reservation.createdAt.toISOString(),
+    decidedAt: reservation.decidedAt?.toISOString() ?? null,
+    decidedById: reservation.decidedById,
+    rejectionReason: reservation.rejectionReason,
+    document: reservation.documentKey ? { name: reservation.documentName, mime: reservation.documentMime, size: reservation.documentSize } : null,
     room: reservation.room,
   };
 }

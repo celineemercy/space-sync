@@ -27,7 +27,10 @@ export class AvailabilityService {
         },
         reservations: {
           none: {
-            status: ReservationStatus.CONFIRMED,
+            OR: [
+              { status: ReservationStatus.CONFIRMED },
+              { status: ReservationStatus.PENDING, startsAt: { gt: new Date() } },
+            ],
             startsAt: { lt: endsAt },
             endsAt: { gt: startsAt },
           },

@@ -1,12 +1,12 @@
-const baseUrl = process.env.CAMPUSSPACE_API_URL ?? 'http://localhost:3000/api/v1';
+const baseUrl = process.env.SPACE_SYNC_API_URL ?? 'http://localhost:3000/api/v1';
 const email = process.env.SEED_DEMO_EMAIL ?? 'student@example.test';
-const password = process.env.SEED_DEMO_PASSWORD ?? 'CampusSpaceDemo123!';
+const password = process.env.SEED_DEMO_PASSWORD ?? 'SpaceSyncDemo123!';
 
 async function request(path, options = {}) {
   const response = await fetch(`${baseUrl}${path}`, {
     ...options,
     headers: {
-      'content-type': 'application/json',
+      ...(options.body instanceof FormData ? {} : { 'content-type': 'application/json' }),
       ...options.headers,
     },
   });
@@ -45,15 +45,18 @@ assert(
 );
 
 const roomId = availability.body.rooms[0].id;
-const reservationInput = JSON.stringify({
-  roomId,
-  startsAt: startsAt.toISOString(),
-  endsAt: endsAt.toISOString(),
-});
+function reservationInput() {
+  const body = new FormData();
+  body.append('roomId', roomId);
+  body.append('startsAt', startsAt.toISOString());
+  body.append('endsAt', endsAt.toISOString());
+  body.append('document', new Blob(['%PDF-1.7\n1 0 obj\n<<>>\nendobj\n%%EOF'], { type: 'application/pdf' }), 'permit.pdf');
+  return body;
+}
 
 const attempts = await Promise.all([
-  request('/reservations', { method: 'POST', headers, body: reservationInput }),
-  request('/reservations', { method: 'POST', headers, body: reservationInput }),
+  request('/reservations', { method: 'POST', headers, body: reservationInput() }),
+  request('/reservations', { method: 'POST', headers, body: reservationInput() }),
 ]);
 const successful = attempts.filter((attempt) => attempt.status === 201);
 const conflicting = attempts.filter(
@@ -63,6 +66,7 @@ const conflicting = attempts.filter(
 try {
   assert(successful.length === 1, 'Concurrent reservation check did not create exactly one booking.');
   assert(conflicting.length === 1, 'Concurrent reservation check did not reject exactly one booking.');
+  assert(successful[0].body?.status === 'PENDING', 'The new request is not awaiting approval.');
 
   const mine = await request('/reservations/mine', { headers });
   assert(
@@ -77,4 +81,4 @@ try {
   );
 }
 
-console.log('CampusSpace API smoke test passed: health, login, rooms, availability, concurrency, list, cancel.');
+console.log('space-sync API smoke test passed: health, login, rooms, availability, file upload, pending conflict, list, cancel.');
