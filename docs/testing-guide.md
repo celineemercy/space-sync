@@ -1,4 +1,4 @@
-# CampusSpace Testing and APK Readiness Guide
+# space-sync Testing and APK Readiness Guide
 
 ## What Docker Can and Cannot Test
 
@@ -19,9 +19,9 @@ docker compose --profile full ps
 
 Expected services:
 
-- `campus-space-db-1` is healthy on host port `5433`.
-- `campus-space-server-1` is healthy on host port `3000`.
-- `campus-space-mobile-web-1` serves the browser UI on host port `8081`.
+- `space-sync-db-1` is healthy on host port `5433`.
+- `space-sync-server-1` is healthy on host port `3000`.
+- `space-sync-mobile-web-1` serves the browser UI on host port `8081`.
 - `http://localhost:3000/api/v1/health` returns an OK response.
 - `http://localhost:8081` opens the browser-based mobile UI preview.
 
@@ -34,7 +34,7 @@ docker compose --profile full logs -f server
 docker compose --profile full down
 ```
 
-Do not add `-v` to `down` unless you intentionally want to delete the local CampusSpace database volume.
+Do not add `-v` to `down` unless you intentionally want to delete the local space-sync database volume.
 
 ## 2. Run Automated Checks
 
@@ -143,14 +143,14 @@ A distributable APK needs an HTTPS API reachable from the phone. The local Docke
 For a USB-connected device with Android platform tools installed:
 
 ```bash
-adb install -r CampusSpace.apk
+adb install -r space-sync.apk
 ```
 
 ## 7. Release Evidence
 
 ### Runtime logs
 
-The Android app writes `[CampusSpace]` API events to the device log. They include the method, route, status or error code, and duration. Query values, request bodies, and access tokens are not logged. For a USB-connected test device, collect them with `adb logcat` and filter for `CampusSpace`. The API writes one `HttpRequest` event per completed request, and its exception filter records unexpected failures. On a Compose deployment, inspect the API with `docker compose logs server` (add the deployment's profile and compose file options as needed).
+The Android app writes `[space-sync]` API events to the device log. They include the method, route, status or error code, and duration. Query values, request bodies, and access tokens are not logged. For a USB-connected test device, collect them with `adb logcat` and filter for `space-sync`. The API writes one `HttpRequest` event per completed request, and its exception filter records unexpected failures. On a Compose deployment, inspect the API with `docker compose logs server` (add the deployment's profile and compose file options as needed).
 
 Record the test time and the corresponding app and API log lines when reporting a failure. Avoid attaching unfiltered device logs because other apps can write sensitive data there.
 

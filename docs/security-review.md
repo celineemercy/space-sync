@@ -1,6 +1,6 @@
 # Security Review Notes
 
-Review date: 18 September 2026
+Review date: 13 November 2026
 
 ## Implemented controls
 
@@ -13,6 +13,7 @@ Review date: 18 September 2026
 - Global API rate limiting with a stricter login limit.
 - Proxy-aware client IP handling and standard Helmet HTTP headers.
 - Ownership checks for reservation cancellation.
+- Server-side admin role checks, protected permission-file access, file signature and size validation, and timed file deletion.
 - PostgreSQL row locking and a transactional conflict recheck before reservation creation.
 - Secrets, signing files, local environment files, and APK/AAB artifacts are ignored by Git.
 - The VPS Compose stack exposes only Caddy; PostgreSQL and the API remain on a private Docker network.
@@ -20,12 +21,9 @@ Review date: 18 September 2026
 
 ## Dependency audit disposition
 
-`npm audit fix` was run without `--force`. Remaining advisories require incompatible framework changes according to npm's proposed remediation, so they were not forced:
+`npm audit fix` was run without `--force` on the server. `npm audit --omit=dev` reported zero production dependency vulnerabilities. The full server audit still reports three moderate advisories in Vitest development tooling. Expo dependencies need a separate audit before an APK release.
 
-- Prisma CLI currently brings `deepmerge-ts` and `mysql2` advisories. CampusSpace supplies static, operator-controlled Prisma configuration and uses PostgreSQL rather than MySQL. The affected packages are migration/tooling dependencies, not request parsers exposed by application endpoints.
-- Expo tooling currently brings moderate advisories through URI/configuration build dependencies. They are upstream Expo toolchain dependencies; forcing npm's suggested versions would downgrade outside Expo SDK 57's supported dependency set.
-
-These advisories should be rechecked whenever a compatible Prisma 7 or Expo SDK 57 patch is published and before a public deployment. Do not use `npm audit fix --force` without a deliberate framework migration and full regression test.
+Recheck advisories before public deployment. Do not use `npm audit fix --force` without a deliberate framework migration and full regression test.
 
 ## Release requirements
 
