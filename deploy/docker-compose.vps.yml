@@ -1,4 +1,4 @@
-name: campus-space-production
+name: space-sync-production
 
 x-logging: &default-logging
   driver: json-file
@@ -35,7 +35,7 @@ services:
     build:
       context: ../server
       dockerfile: Dockerfile
-    image: campus-space-server:${APP_IMAGE_TAG:-latest}
+    image: space-sync-server:${APP_IMAGE_TAG:-latest}
     restart: unless-stopped
     init: true
     environment:
@@ -48,6 +48,9 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN:-}
       SEED_DEMO_EMAIL: ${SEED_DEMO_EMAIL:-student@example.test}
       SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-}
+      DOCUMENT_STORAGE_DIR: /app/private-documents
+    volumes:
+      - document_data:/app/private-documents
     expose:
       - "3000"
     depends_on:
@@ -101,6 +104,7 @@ services:
 
 volumes:
   postgres_data:
+  document_data:
   caddy_data:
   caddy_config:
 

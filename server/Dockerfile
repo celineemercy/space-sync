@@ -10,6 +10,7 @@ RUN npm ci
 
 COPY prisma.config.ts tsconfig.json tsconfig.build.json nest-cli.json ./
 COPY prisma ./prisma
+COPY scripts ./scripts
 RUN DATABASE_URL=postgresql://build:build@localhost:5432/build npx prisma generate
 
 COPY src ./src
@@ -29,7 +30,10 @@ COPY --from=build --chown=node:node /app/prisma.config.ts ./prisma.config.ts
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/dist ./dist
 COPY --from=build --chown=node:node /app/prisma ./prisma
+COPY --from=build --chown=node:node /app/scripts ./scripts
 COPY --from=build --chown=node:node /app/src/generated ./src/generated
+
+RUN mkdir -p /app/private-documents && chown node:node /app/private-documents
 
 EXPOSE 3000
 
