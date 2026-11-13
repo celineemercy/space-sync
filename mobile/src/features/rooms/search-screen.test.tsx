@@ -141,6 +141,7 @@ describe("SearchScreen primary states", () => {
 
   it("validates the form before requesting availability", async () => {
     const screen = await render(<SearchScreen />);
+    await fireEvent.press(screen.getByLabelText("Filters"));
     await fireEvent.changeText(
       screen.getByLabelText("Minimum capacity (optional)"),
       "0",
@@ -150,6 +151,15 @@ describe("SearchScreen primary states", () => {
       screen.getByText("Capacity must be a positive whole number."),
     ).toBeTruthy();
     expect(mockAvailability.mutate).not.toHaveBeenCalled();
+  });
+
+  it("shows applied filters and lets users remove one", async () => {
+    const screen = await render(<SearchScreen />);
+    await fireEvent.press(screen.getByLabelText("Filters"));
+    await fireEvent.changeText(screen.getByLabelText("Minimum capacity (optional)"), "8");
+    expect(screen.getByText("Applied filters")).toBeTruthy();
+    await fireEvent.press(screen.getByLabelText("Remove capacity filter, 8 seats"));
+    expect(screen.queryByText("Applied filters")).toBeNull();
   });
 
   it("disables repeat submission while availability is loading", async () => {
@@ -204,12 +214,14 @@ it.each(["capacity", "facility", "date", "start", "end"])(
 
     switch (field) {
       case "capacity":
+        await fireEvent.press(screen.getByLabelText("Filters"));
         await fireEvent.changeText(
           screen.getByLabelText("Minimum capacity (optional)"),
           "8",
         );
         break;
       case "facility":
+        await fireEvent.press(screen.getByLabelText("Filters"));
         await fireEvent.press(
           screen.getByRole("checkbox", { name: "Projector" }),
         );

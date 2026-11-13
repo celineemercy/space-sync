@@ -5,14 +5,16 @@ import type { Room } from "@/types/domain";
 export function RoomCard({
   room,
   onPress,
+  interval,
 }: {
   room: Room;
   onPress: () => void;
+  interval?: string;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${room.name}, capacity ${room.capacity}`}
+      accessibilityLabel={`${room.name}, capacity ${room.capacity}${interval ? `, available ${interval}` : ""}`}
       onPress={onPress}
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
@@ -24,6 +26,7 @@ export function RoomCard({
         <Text style={styles.capacity}>{room.capacity} seats</Text>
       </View>
       <Text style={styles.location}>{room.location}</Text>
+      {interval ? <Text style={styles.interval}>Available {interval}</Text> : null}
       <View style={styles.facilities}>
         {room.facilities.map((facility) => (
           <Text key={facility.id} style={styles.chip}>
@@ -59,6 +62,7 @@ const styles = StyleSheet.create({
   },
   capacity: { ...Typography.label, color: Colors.accent },
   location: { ...Typography.body, color: Colors.textMuted },
+  interval: { ...Typography.label, color: Colors.primary },
   facilities: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.sm },
   chip: {
     color: Colors.text,

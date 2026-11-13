@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 import { AppButton } from "@/components/ui/app-button";
 import { ErrorState, LoadingState } from "@/components/ui/async-state";
@@ -20,6 +21,7 @@ import {
 import { useAuth } from "@/providers/auth-provider";
 
 export default function SavedRoomsScreen() {
+  const router = useRouter();
   const { user } = useAuth();
   const savedRooms = useSavedRooms();
   const updateSavedRoom = useUpdateSavedRoom();
@@ -87,6 +89,10 @@ export default function SavedRoomsScreen() {
                 <Text style={styles.capacity}>{savedRoom.capacity} seats</Text>
               </View>
               <Text style={styles.location}>{savedRoom.location}</Text>
+              <AppButton
+                label={`View ${savedRoom.name}`}
+                onPress={() => router.push({ pathname: "/(app)/room/[id]", params: { id: savedRoom.roomId } })}
+              />
 
               {editingId === savedRoom.id ? (
                 <View style={styles.editor}>
@@ -180,7 +186,7 @@ export default function SavedRoomsScreen() {
 
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: Colors.background },
-  content: { paddingTop: Spacing.xl },
+  content: { paddingTop: Spacing.md },
   card: {
     backgroundColor: Colors.surface,
     borderRadius: Radius.lg,

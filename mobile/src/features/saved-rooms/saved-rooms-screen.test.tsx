@@ -2,6 +2,9 @@ import { fireEvent, render } from "@testing-library/react-native";
 import SavedRoomsScreen from "@/app/(app)/(tabs)/saved";
 import type { SavedRoom } from "@/features/saved-rooms/model";
 
+const mockPush = jest.fn();
+jest.mock("expo-router", () => ({ useRouter: () => ({ push: mockPush }) }));
+
 const savedRoom: SavedRoom = {
   id: "room-1",
   roomId: "room-1",
@@ -56,6 +59,7 @@ beforeEach(() => {
   mockSavedRoomsQuery.isLoading = false;
   mockSavedRoomsQuery.isFetching = false;
   mockRefetch.mockReset();
+  mockPush.mockReset();
   mockUpdate.error = null;
   mockUpdate.isPending = false;
   mockUpdate.mutateAsync.mockReset().mockResolvedValue(savedRoom);
@@ -71,6 +75,15 @@ it("reads saved rooms from local persistence", async () => {
 
   expect(screen.getByText("Campus Room")).toBeTruthy();
   expect(screen.getByText("Quiet after lunch")).toBeTruthy();
+});
+
+it("opens a saved room's details", async () => {
+  const screen = await render(<SavedRoomsScreen />);
+  await fireEvent.press(screen.getByLabelText("View Campus Room"));
+  expect(mockPush).toHaveBeenCalledWith({
+    pathname: "/(app)/room/[id]",
+    params: { id: "room-1" },
+  });
 });
 
 it("renders an empty state when nothing is saved", async () => {

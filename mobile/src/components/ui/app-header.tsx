@@ -26,7 +26,7 @@ export function AppHeader({
             <View style={styles.brandMark}>
               <Ionicons name="business" color={Colors.primary} size={18} />
             </View>
-            <Text style={styles.brandName}>CampusSpace</Text>
+            <Text style={styles.brandName}>space-sync</Text>
           </View>
           {actionLabel && onAction ? (
             <Pressable
@@ -49,7 +49,7 @@ export function AppHeader({
           <Text style={styles.description}>{description}</Text>
         </View>
 
-        {accountLabel ? (
+        {accountLabel && actionLabel ? (
           <View style={styles.account}>
             <Ionicons name="person-circle-outline" color="#D8EADF" size={18} />
             <Text numberOfLines={1} style={styles.accountLabel}>
@@ -67,11 +67,11 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: Colors.primary,
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
-    paddingBottom: Spacing.xl,
-    gap: Spacing.lg,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.lg,
+    gap: Spacing.sm,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   topRow: {
     flexDirection: "row",
@@ -101,8 +101,8 @@ const styles = StyleSheet.create({
   actionPressed: { opacity: 0.72 },
   actionLabel: { ...Typography.label, color: "#FFFFFF" },
   copy: { gap: Spacing.xs },
-  title: { ...Typography.display, color: "#FFFFFF" },
-  description: { ...Typography.body, color: "#D8EADF", maxWidth: 340 },
+  title: { ...Typography.headline, color: "#FFFFFF" },
+  description: { ...Typography.caption, color: "#D8EADF", maxWidth: 340 },
   account: {
     alignSelf: "flex-start",
     flexDirection: "row",

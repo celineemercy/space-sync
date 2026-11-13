@@ -30,6 +30,7 @@ export default function SearchScreen() {
   const [endsAt, setEndsAt] = useState(initial.endsAt);
   const [capacity, setCapacity] = useState("");
   const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [searchedInput, setSearchedInput] = useState<AvailabilityInput | null>(null);
   const [showSignOutConfirmation, setShowSignOutConfirmation] = useState(false);
@@ -123,8 +124,8 @@ export default function SearchScreen() {
   return (
     <View style={styles.page}>
       <AppHeader
-        title="Find your space"
-        description="Discover an available campus room for your next study session or meeting."
+        title="Find a room"
+        description="Choose a time, compare spaces, and book."
         accountLabel={user?.email}
         actionLabel="Sign out"
         onAction={() => setShowSignOutConfirmation(true)}
@@ -134,15 +135,9 @@ export default function SearchScreen() {
           <OfflineBanner updatedAt={roomsQuery.data.updatedAt} />
         ) : null}
 
-        <AppButton label="Scan room QR code" variant="secondary" onPress={() => router.push("/(app)/scan")} />
-
         <View style={styles.panel}>
           <View style={styles.sectionHeading}>
-            <Text style={styles.sectionEyebrow}>SEARCH AVAILABILITY</Text>
-            <Text style={styles.sectionTitle}>When do you need a room?</Text>
-            <Text style={styles.sectionDescription}>
-              Choose a date and time, then refine the results if needed.
-            </Text>
+            <Text style={styles.sectionTitle}>When do you need it?</Text>
           </View>
           <DateTimeControls
             date={date}
@@ -158,51 +153,55 @@ export default function SearchScreen() {
               setEndsAt(value);
             }}
           />
-          <FormField
-            label="Minimum capacity (optional)"
-            value={capacity}
-            onChangeText={(value) => {
-              clearSearch();
-              setCapacity(value);
-            }}
-            keyboardType="number-pad"
-            placeholder="For example, 8"
+          <AppButton
+            label={showFilters ? "Hide filters" : `Filters${capacity || selectedFacilities.length ? ` (${Number(Boolean(capacity)) + selectedFacilities.length})` : ""}`}
+            variant="secondary"
+            onPress={() => setShowFilters((current) => !current)}
           />
-          {facilities.length ? (
-            <View style={styles.filterGroup}>
-              <Text style={styles.filterLabel}>Facilities (optional)</Text>
-              <View style={styles.chips}>
-                {facilities.map((facility) => {
-                  const selected = selectedFacilities.includes(facility.id);
-                  return (
-                    <Pressable
-                      key={facility.id}
-                      accessibilityRole="checkbox"
-                      accessibilityLabel={facility.name}
-                      accessibilityState={{ checked: selected }}
-                      onPress={() => {
-                        clearSearch();
-                        setSelectedFacilities((current) =>
-                          selected
-                            ? current.filter((id) => id !== facility.id)
-                            : [...current, facility.id],
-                        );
-                      }}
-                      style={[styles.chip, selected && styles.selectedChip]}
-                    >
-                      <Text
-                        style={[
-                          styles.chipText,
-                          selected && styles.selectedChipText,
-                        ]}
-                      >
-                        {facility.name}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
+          {showFilters ? (
+            <>
+              <FormField
+                label="Minimum capacity (optional)"
+                value={capacity}
+                onChangeText={(value) => {
+                  clearSearch();
+                  setCapacity(value);
+                }}
+                keyboardType="number-pad"
+                placeholder="For example, 8"
+              />
+              {facilities.length ? (
+                <View style={styles.filterGroup}>
+                  <Text style={styles.filterLabel}>Facilities (optional)</Text>
+                  <View style={styles.chips}>
+                    {facilities.map((facility) => {
+                      const selected = selectedFacilities.includes(facility.id);
+                      return (
+                        <Pressable
+                          key={facility.id}
+                          accessibilityRole="checkbox"
+                          accessibilityLabel={facility.name}
+                          accessibilityState={{ checked: selected }}
+                          onPress={() => {
+                            clearSearch();
+                            setSelectedFacilities((current) =>
+                              selected
+                                ? current.filter((id) => id !== facility.id)
+                                : [...current, facility.id],
+                            );
+                          }}
+                          style={[styles.chip, selected && styles.selectedChip]}
+                        >
+                          <Text style={[styles.chipText, selected && styles.selectedChipText]}>
+                            {facility.name}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </View>
+              ) : null}
+            </>
           ) : null}
           {validationError ? (
             <StatusMessage error={new Error(validationError)} />
@@ -223,6 +222,47 @@ export default function SearchScreen() {
             onPress={search}
           />
         </View>
+
+        <AppButton
+          label="Scan room QR code"
+          variant="secondary"
+          onPress={() => router.push("/(app)/scan")}
+        />
+
+        {capacity || selectedFacilities.length ? (
+          <View style={styles.appliedFilters}>
+            <Text style={styles.filterLabel}>Applied filters</Text>
+            <View style={styles.chips}>
+              {capacity ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Remove capacity filter, ${capacity} seats`}
+                  onPress={() => { clearSearch(); setCapacity(""); }}
+                  style={styles.chip}
+                >
+                  <Text style={styles.chipText}>{capacity}+ seats  ×</Text>
+                </Pressable>
+              ) : null}
+              {selectedFacilities.map((id) => {
+                const facility = facilities.find((item) => item.id === id);
+                return (
+                  <Pressable
+                    key={id}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Remove ${facility?.name ?? id} filter`}
+                    onPress={() => {
+                      clearSearch();
+                      setSelectedFacilities((current) => current.filter((value) => value !== id));
+                    }}
+                    style={styles.chip}
+                  >
+                    <Text style={styles.chipText}>{facility?.name ?? id}  ×</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        ) : null}
 
         <View style={styles.resultsHeader}>
           <Text style={styles.sectionTitle}>
@@ -252,13 +292,20 @@ export default function SearchScreen() {
           </View>
         ) : (
           visibleRooms.map((room) => (
-            <RoomCard key={room.id} room={room} onPress={() => openRoom(room)} />
+            <RoomCard
+              key={room.id}
+              room={room}
+              interval={searchedInput && searchResult
+                ? `${startsAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}–${endsAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                : undefined}
+              onPress={() => openRoom(room)}
+            />
           ))
         )}
       </Screen>
       <ConfirmationDialog
         visible={showSignOutConfirmation}
-        title="Sign out of CampusSpace?"
+        title="Sign out of space-sync?"
         description="You will need to enter your credentials again to manage reservations."
         confirmLabel="Sign out"
         cancelLabel="Stay signed in"
@@ -272,7 +319,7 @@ export default function SearchScreen() {
 
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: Colors.background },
-  content: { paddingTop: Spacing.xl },
+  content: { paddingTop: Spacing.md },
   panel: {
     backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
@@ -282,14 +329,13 @@ const styles = StyleSheet.create({
     gap: Spacing.lg,
   },
   sectionHeading: { gap: Spacing.xs },
-  sectionEyebrow: { ...Typography.overline, color: Colors.primary },
   sectionTitle: { ...Typography.headline, color: Colors.text },
-  sectionDescription: { ...Typography.body, color: Colors.textMuted },
+  appliedFilters: { gap: Spacing.sm },
   filterGroup: { gap: Spacing.sm },
   filterLabel: { ...Typography.label, color: Colors.text },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.sm },
   chip: {
-    minHeight: 44,
+    minHeight: 48,
     justifyContent: "center",
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
