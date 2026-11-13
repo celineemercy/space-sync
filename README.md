@@ -78,6 +78,7 @@ Student reservation requests require one PDF, JPG, or PNG permission file up to 
 - [State management](docs/state-management.md)
 - [Local data persistence](docs/local-data-persistence.md)
 - [VPS deployment](docs/vps-deployment.md)
+- [CI/CD setup](docs/ci-cd.md)
 - [Implementation plan](docs/implementation-plan.md)
 
 ## Status

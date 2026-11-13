@@ -195,9 +195,9 @@ git switch --detach <known-good-commit>
 
 Return to normal updates afterward with `git switch dev`.
 
-## 9. Optional GitHub Deployment Workflow
+## 9. GitHub Deployment Workflow
 
-The `Deploy VPS` workflow is manual and runs only from `dev`. Create a protected GitHub environment named `vps-production`, optionally require reviewer approval, and configure:
+The `Deploy VPS` workflow can be dispatched manually from `dev`. After `CI` succeeds on a `dev` push, it can also run automatically when the repository variable `AUTO_DEPLOY_VPS` is `true`. Create a protected GitHub environment named `vps-production`, restrict it to `dev`, and configure:
 
 Environment variable:
 
@@ -211,7 +211,7 @@ Environment secrets:
 - `VPS_SSH_PRIVATE_KEY`: dedicated deployment private key
 - `VPS_KNOWN_HOSTS`: verified output from `ssh-keyscan` collected over a trusted channel
 
-Add the matching public key to the deployment user's `~/.ssh/authorized_keys`. The workflow refuses to overwrite a dirty VPS checkout, fast-forwards `dev`, runs the deployment script, and confirms the public health endpoint.
+Add the matching public key to the deployment user's `~/.ssh/authorized_keys`. The workflow refuses to overwrite a dirty VPS checkout, verifies that the requested commit is still the head of `dev`, fast-forwards to that exact commit, runs the deployment script, and confirms the public health endpoint. See [CI/CD setup](ci-cd.md) for activation steps and the Android APK workflow.
 
 ## 10. Connect the Android Build
 
