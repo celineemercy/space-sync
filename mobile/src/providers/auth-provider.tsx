@@ -21,7 +21,7 @@ type AuthContextValue = {
   accessToken: string | null;
   user: User | null;
   isRestoring: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<User>;
   signOut: () => Promise<void>;
 };
 
@@ -69,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await saveSession(session.accessToken, session.user);
     setAccessToken(session.accessToken);
     setUser(session.user);
+    return session.user;
   }, []);
 
   const value = useMemo(

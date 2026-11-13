@@ -7,8 +7,9 @@ import { StatusMessage } from "@/components/ui/status-message";
 import { Colors, Radius, Spacing, Typography } from "@/constants/theme";
 import { useAuth } from "@/providers/auth-provider";
 import { loginSchema, type LoginInput } from "./validation";
+import type { User } from "@/types/domain";
 
-export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
+export function LoginForm({ onSuccess }: { onSuccess: (user: User) => void }) {
   const { signIn } = useAuth();
   const {
     control,
@@ -22,8 +23,8 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
 
   const submit = handleSubmit(async ({ email, password }) => {
     try {
-      await signIn(email, password);
-      onSuccess();
+      const user = await signIn(email, password);
+      onSuccess(user);
     } catch (error) {
       setError("root", {
         message: error instanceof Error ? error.message : "Unable to sign in.",
@@ -33,7 +34,7 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <View style={styles.card}>
-      <Text style={styles.cardTitle}>Student sign in</Text>
+      <Text style={styles.cardTitle}>Sign in</Text>
       <Controller
         control={control}
         name="email"

@@ -11,15 +11,15 @@ export default function LoginScreen() {
     <Screen contentContainerStyle={styles.screen}>
       <View style={styles.hero}>
         <View style={styles.mark}>
-          <Text style={styles.markText}>CS</Text>
+          <Text style={styles.markText}>SS</Text>
         </View>
-        <Text style={styles.title}>CampusSpace</Text>
+        <Text style={styles.title}>space-sync</Text>
         <Text style={styles.subtitle}>
           Find and reserve the right campus room.
         </Text>
       </View>
 
-      <LoginForm onSuccess={() => router.replace("/(app)/(tabs)/search")} />
+      <LoginForm onSuccess={(user) => router.replace(user.role === "ADMIN" ? "/(app)/admin" : "/(app)/(tabs)/search")} />
     </Screen>
   );
 }

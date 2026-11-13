@@ -4,7 +4,7 @@ import { Colors, Typography } from "@/constants/theme";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function AppLayout() {
-  const { accessToken, isRestoring } = useAuth();
+  const { accessToken, user, isRestoring } = useAuth();
 
   if (isRestoring) {
     return (
@@ -26,6 +26,8 @@ export default function AppLayout() {
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="admin" options={{ title: "Admin requests", headerShown: user?.role !== "ADMIN" }} />
+      <Stack.Screen name="admin-request/[id]" options={{ title: "Review request" }} />
       <Stack.Screen name="room/[id]" options={{ title: "Room details" }} />
       <Stack.Screen name="scan" options={{ title: "Scan room" }} />
     </Stack>

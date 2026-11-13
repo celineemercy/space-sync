@@ -1,19 +1,25 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Tabs } from "expo-router";
-import { Colors, Typography } from "@/constants/theme";
+import { Redirect, Tabs } from "expo-router";
+import { Colors, Spacing, Typography } from "@/constants/theme";
+import { useAuth } from "@/providers/auth-provider";
 
 export default function TabsLayout() {
+  const { user } = useAuth();
+  if (user?.role === "ADMIN") return <Redirect href="/(app)/admin" />;
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textMuted,
-        tabBarLabelStyle: Typography.caption,
+        tabBarLabelStyle: { ...Typography.caption, lineHeight: 18 },
         tabBarHideOnKeyboard: true,
         tabBarStyle: {
           backgroundColor: Colors.surface,
           borderTopColor: Colors.border,
+          minHeight: 64,
+          paddingTop: Spacing.xs,
+          paddingBottom: Spacing.sm,
         },
       }}
     >

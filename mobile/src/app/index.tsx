@@ -4,7 +4,7 @@ import { Colors } from "@/constants/theme";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function IndexRoute() {
-  const { accessToken, isRestoring } = useAuth();
+  const { accessToken, user, isRestoring } = useAuth();
   if (isRestoring) {
     return (
       <View style={styles.center}>
@@ -13,7 +13,7 @@ export default function IndexRoute() {
     );
   }
   return (
-    <Redirect href={accessToken ? "/(app)/(tabs)/search" : "/(auth)/login"} />
+    <Redirect href={accessToken ? (user?.role === "ADMIN" ? "/(app)/admin" : "/(app)/(tabs)/search") : "/(auth)/login"} />
   );
 }
 

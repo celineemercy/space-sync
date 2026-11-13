@@ -28,13 +28,21 @@ it("shows validation errors without calling the API", async () => {
 });
 
 it("navigates after a successful sign in", async () => {
-  mockSignIn.mockResolvedValueOnce(undefined);
+  mockSignIn.mockResolvedValueOnce({ id: "student", email: "student@example.test", role: "STUDENT" });
   const screen = await render(<LoginScreen />);
   await fireEvent.changeText(screen.getByLabelText("Password"), "password123");
   await fireEvent.press(screen.getByLabelText("Sign in"));
 
   await waitFor(() => expect(mockSignIn).toHaveBeenCalledWith("student@example.test", "password123"));
   expect(mockReplace).toHaveBeenCalledWith("/(app)/(tabs)/search");
+});
+
+it("sends an admin to the review queue", async () => {
+  mockSignIn.mockResolvedValueOnce({ id: "admin", email: "admin@example.test", role: "ADMIN" });
+  const screen = await render(<LoginScreen />);
+  await fireEvent.changeText(screen.getByLabelText("Password"), "password123");
+  await fireEvent.press(screen.getByLabelText("Sign in"));
+  await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/(app)/admin"));
 });
 
 it("shows a sign in failure and stays on the form", async () => {
