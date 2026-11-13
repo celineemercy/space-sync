@@ -1,11 +1,11 @@
 import 'dotenv/config';
 import { hash } from '@node-rs/argon2';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient, ReservationStatus } from '../src/generated/prisma/client.js';
+import { PrismaClient, ReservationStatus, UserRole } from '../src/generated/prisma/client.js';
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
-  throw new Error('DATABASE_URL is required to seed CampusSpace.');
+  throw new Error('DATABASE_URL is required to seed space-sync.');
 }
 
 const demoEmail = (process.env.SEED_DEMO_EMAIL ?? 'student@example.test').trim().toLowerCase();
@@ -37,8 +37,8 @@ async function main() {
 
   const student = await prisma.user.upsert({
     where: { email: demoEmail },
-    update: { passwordHash },
-    create: { id: 'user-demo-student', email: demoEmail, passwordHash },
+    update: { passwordHash, role: UserRole.STUDENT },
+    create: { id: 'user-demo-student', email: demoEmail, passwordHash, role: UserRole.STUDENT },
   });
 
   const secondStudent = await prisma.user.upsert({
@@ -162,7 +162,7 @@ async function main() {
     },
   });
 
-  console.info(`Seeded CampusSpace demo data for ${student.email}.`);
+  console.info(`Seeded space-sync demo data for ${student.email}.`);
 }
 
 main()
