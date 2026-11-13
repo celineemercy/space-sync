@@ -11,6 +11,7 @@ deploy/backups/
 
 # Expo / React Native
 .expo/
+.expo-release-check/
 .expo-shared/
 web-build/
 mobile/android/
@@ -32,6 +33,7 @@ coverage/
 
 # Logs and local tooling
 *.log
+private-documents/
 .cache/
 .idea/
 .vscode/

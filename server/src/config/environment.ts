@@ -13,6 +13,7 @@ const environmentSchema = z.object({
     .default('1h'),
   CAMPUS_TIMEZONE: z.string().default('Asia/Jakarta'),
   CORS_ORIGIN: z.string().optional(),
+  DOCUMENT_STORAGE_DIR: z.string().optional(),
 });
 
 export function validateEnvironment(values: Record<string, unknown>) {
