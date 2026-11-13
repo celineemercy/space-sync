@@ -24,7 +24,7 @@ export function useCreateReservation() {
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: { roomId: string; startsAt: string; endsAt: string }) =>
+    mutationFn: (input: { roomId: string; startsAt: string; endsAt: string; document: { uri: string; name: string; mimeType: string; size?: number; file?: File } }) =>
       createReservation(input, accessToken),
     onSuccess: async () => {
       await Promise.all([

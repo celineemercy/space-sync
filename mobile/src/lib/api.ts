@@ -48,7 +48,7 @@ export async function apiRequest<T>(
   const method = options.method ?? "GET";
   const route = path.split("?")[0].replace(/\/[0-9a-f-]{20,}(?=\/|$)/gi, "/:id");
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 12_000);
+  const timeout = setTimeout(() => controller.abort(), options.body instanceof FormData ? 30_000 : 12_000);
 
   try {
     const response = await fetch(`${apiUrl()}${path}`, {
@@ -56,7 +56,7 @@ export async function apiRequest<T>(
       signal: controller.signal,
       headers: {
         Accept: "application/json",
-        "Content-Type": "application/json",
+        ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         ...options.headers,
       },
@@ -105,7 +105,7 @@ export async function apiRequest<T>(
     }
     logRuntime("warn", "api_request_failed", { method, route, code: "NETWORK_ERROR", durationMs: Date.now() - startedAt });
     throw new ApiClientError(
-      "Unable to reach CampusSpace. Check your connection.",
+      "Unable to reach space-sync. Check your connection.",
       0,
       "NETWORK_ERROR",
     );

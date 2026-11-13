@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
+import * as DocumentPicker from "expo-document-picker";
 import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { AppButton } from "@/components/ui/app-button";
@@ -34,11 +35,29 @@ export default function RoomDetailScreen() {
   const savedRooms = useSavedRooms();
   const saveRoom = useSaveRoom();
   const [dialog, setDialog] = useState<"confirm" | "success" | null>(null);
+  const [document, setDocument] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
+  const [documentError, setDocumentError] = useState<string | null>(null);
+
+  const chooseDocument = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({ type: ["application/pdf", "image/jpeg", "image/png"], multiple: false, copyToCacheDirectory: true });
+      if (result.canceled) return;
+      const selected = result.assets[0];
+      if (!selected || (selected.size ?? 0) > 10 * 1024 * 1024) {
+        setDocumentError("Choose one PDF, JPG, or PNG up to 10 MB.");
+        return;
+      }
+      setDocument(selected);
+      setDocumentError(null);
+    } catch {
+      setDocumentError("Unable to open your files. Try again.");
+    }
+  };
 
   const reserve = async () => {
-    if (!startsAt || !endsAt) return;
+    if (!startsAt || !endsAt || !document) return;
     try {
-      await reservation.mutateAsync({ roomId, startsAt, endsAt });
+      await reservation.mutateAsync({ roomId, startsAt, endsAt, document: { uri: document.uri, name: document.name, mimeType: document.mimeType ?? "application/octet-stream", size: document.size, file: document.file } });
       setDialog("success");
     } catch {
       // The mutation error is rendered below so the selected interval remains visible.
@@ -90,51 +109,23 @@ export default function RoomDetailScreen() {
           <Text style={styles.location}>{room.location}</Text>
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.label}>Capacity</Text>
-          <Text style={styles.value}>{room.capacity} people</Text>
-          <Text style={styles.label}>About this room</Text>
-          <Text style={styles.description}>
-            {room.description ?? "No description is available."}
-          </Text>
-          <Text style={styles.label}>Facilities</Text>
-          <View style={styles.chips}>
-            {room.facilities.map((facility) => (
-              <Text key={facility.id} style={styles.chip}>
-                {facility.name}
-              </Text>
-            ))}
-          </View>
-        </View>
-
-        <View style={styles.savedCard}>
-          <Text style={styles.savedTitle}>Keep for later</Text>
-          <Text style={styles.description}>
-            Save this room on this device, then add a personal note from the
-            Saved tab. It remains available after restarting the app.
-          </Text>
-          {savedRooms.error ? <StatusMessage error={savedRooms.error} /> : null}
-          {saveRoom.error ? <StatusMessage error={saveRoom.error} /> : null}
-          <AppButton
-            disabled={savedRooms.isLoading}
-            label={isSaved ? "View saved rooms" : "Save room locally"}
-            loading={saveRoom.isPending}
-            onPress={saveLocally}
-            variant={isSaved ? "secondary" : "primary"}
-          />
-        </View>
-
         {startsAt && endsAt ? (
           <View style={styles.bookingCard}>
-            <Text style={styles.bookingTitle}>Selected time</Text>
+            <Text style={styles.bookingTitle}>Book this room</Text>
+            <Text style={styles.label}>Selected time</Text>
             <Text style={styles.value}>{toCampusLabel(startsAt)}</Text>
             <Text style={styles.to}>to</Text>
             <Text style={styles.value}>{toCampusLabel(endsAt)}</Text>
+            <Text style={styles.label}>Permission document (required)</Text>
+            <AppButton label={document ? "Change document" : "Choose PDF or image"} variant="secondary" onPress={() => void chooseDocument()} />
+            {document ? <Text style={styles.description}>{document.name}{document.size ? ` · ${(document.size / 1024 / 1024).toFixed(1)} MB` : ""}</Text> : null}
+            {documentError ? <StatusMessage error={new Error(documentError)} /> : null}
             {reservation.error ? (
               <StatusMessage error={reservation.error} />
             ) : null}
             <AppButton
-              label="Confirm reservation"
+              label="Book room"
+              disabled={!document}
               loading={reservation.isPending}
               onPress={() => {
                 reservation.reset();
@@ -154,21 +145,49 @@ export default function RoomDetailScreen() {
             />
           </View>
         )}
+
+        <View style={styles.card}>
+          <Text style={styles.label}>Capacity</Text>
+          <Text style={styles.value}>{room.capacity} people</Text>
+          <Text style={styles.label}>About this room</Text>
+          <Text style={styles.description}>
+            {room.description ?? "No description is available."}
+          </Text>
+          <Text style={styles.label}>Facilities</Text>
+          <View style={styles.chips}>
+            {room.facilities.map((facility) => (
+              <Text key={facility.id} style={styles.chip}>
+                {facility.name}
+              </Text>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.savedCard}>
+          <Text style={styles.savedTitle}>Keep for later</Text>
+          {savedRooms.error ? <StatusMessage error={savedRooms.error} /> : null}
+          {saveRoom.error ? <StatusMessage error={saveRoom.error} /> : null}
+          <AppButton
+            disabled={savedRooms.isLoading}
+            label={isSaved ? "View saved rooms" : "Save room locally"}
+            loading={saveRoom.isPending}
+            onPress={saveLocally}
+            variant="secondary"
+          />
+        </View>
       </Screen>
       <ConfirmationDialog
         visible={dialog !== null}
-        title={
-          dialog === "success" ? "Reservation confirmed" : "Reserve this room?"
-        }
+        title={dialog === "success" ? "Request submitted" : "Request this room?"}
         description={
           dialog === "success"
-            ? `${room.name} has been added to your reservations.`
+            ? `${room.name} is waiting for admin approval. The time slot is held while your request is pending.`
             : startsAt && endsAt
               ? `${room.name} will be reserved from ${toCampusLabel(startsAt)} until ${toCampusLabel(endsAt)}.`
               : "Return to Search and choose a valid time before reserving."
         }
         confirmLabel={
-          dialog === "success" ? "View reservations" : "Reserve room"
+          dialog === "success" ? "View requests" : "Submit request"
         }
         cancelLabel={dialog === "success" ? "Stay here" : "Review details"}
         loading={reservation.isPending}

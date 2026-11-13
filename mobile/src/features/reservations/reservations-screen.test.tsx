@@ -88,7 +88,7 @@ describe("ReservationsScreen primary states", () => {
   it("renders reservations after data loads", async () => {
     const screen = await render(<ReservationsScreen />);
     expect(screen.getByText("Campus Room")).toBeTruthy();
-    expect(screen.getByText("CONFIRMED")).toBeTruthy();
+    expect(screen.getByText("Approved")).toBeTruthy();
   });
 
   it("renders the empty state", async () => {
@@ -102,7 +102,7 @@ describe("ReservationsScreen primary states", () => {
       screen.getByText("You do not have an active reservation yet."),
     ).toBeTruthy();
     expect(
-      screen.getByText("Cancelled reservations will appear here."),
+      screen.getByText("Completed and cancelled reservations will appear here."),
     ).toBeTruthy();
   });
 

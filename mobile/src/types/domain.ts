@@ -1,6 +1,7 @@
 export type User = {
   id: string;
   email: string;
+  role?: "STUDENT" | "ADMIN";
 };
 
 export type Facility = {
@@ -18,7 +19,7 @@ export type Room = {
   facilities: Facility[];
 };
 
-export type ReservationStatus = "CONFIRMED" | "CANCELLED";
+export type ReservationStatus = "PENDING" | "CONFIRMED" | "REJECTED" | "EXPIRED" | "CANCELLED";
 
 export type Reservation = {
   id: string;
@@ -27,8 +28,14 @@ export type Reservation = {
   status: ReservationStatus;
   cancelledAt: string | null;
   createdAt: string;
+  decidedAt?: string | null;
+  decidedById?: string | null;
+  rejectionReason?: string | null;
+  document?: { name: string | null; mime: string | null; size: number | null } | null;
   room: Pick<Room, "id" | "code" | "name" | "location" | "capacity">;
 };
+
+export type AdminReservation = Reservation & { student: Pick<User, "id" | "email"> };
 
 export type LoginResponse = {
   accessToken: string;
