@@ -10,7 +10,7 @@ describe("secure session storage", () => {
     await saveSession("token", { id: "user-1", email: "student@example.test" });
     expect(secureStore.setItemAsync).toHaveBeenCalledTimes(2);
     expect(secureStore.setItemAsync).toHaveBeenCalledWith(
-      "campus-space.access-token",
+      "space-sync.access-token",
       "token",
     );
   });

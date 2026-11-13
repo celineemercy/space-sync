@@ -25,7 +25,7 @@ export default function ScanRoomScreen() {
       router.replace({ pathname: "/(app)/room/[id]", params: { id: room.id } });
       return;
     }
-    setScanError("This QR code does not match a CampusSpace room. Try another code.");
+    setScanError("This QR code does not match a space-sync room. Try another code.");
   };
 
   const retry = () => {
@@ -36,7 +36,7 @@ export default function ScanRoomScreen() {
   return (
     <Screen contentContainerStyle={styles.content}>
       <Text style={styles.title}>Scan a room QR code</Text>
-      <Text style={styles.help}>Scan a CampusSpace room label to open its details. You can still search rooms without camera access.</Text>
+      <Text style={styles.help}>Scan a space-sync room label to open its details. You can still search rooms without camera access.</Text>
       {rooms.isLoading || !permission ? (
         <LoadingState label="Preparing room scanner..." />
       ) : rooms.error && !rooms.data ? (

@@ -4,7 +4,7 @@ import type {
   UpdateSavedRoomInput,
 } from "@/features/saved-rooms/model";
 
-const STORAGE_KEY = "campus-space.saved-rooms.v1";
+const STORAGE_KEY = "space-sync.saved-rooms.v1";
 
 function localStorage(): Storage | null {
   return typeof window === "undefined" ? null : window.localStorage;

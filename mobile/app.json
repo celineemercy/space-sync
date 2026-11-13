@@ -1,23 +1,26 @@
 {
   "expo": {
-    "name": "CampusSpace",
-    "slug": "campus-space",
+    "name": "space-sync",
+    "slug": "space-sync",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/campus-space-icon.png",
-    "scheme": "campusspace",
+    "icon": "./assets/images/space-sync-icon.png",
+    "scheme": "space-sync",
     "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/expo.icon"
     },
     "android": {
-      "package": "com.celineemercy.campusspace",
+      "package": "com.celineemercy.spacesync",
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "backgroundColor": "#062D64",
-        "foregroundImage": "./assets/images/campus-space-icon.png"
+        "foregroundImage": "./assets/images/space-sync-icon.png"
       },
-      "predictiveBackGestureEnabled": true
+      "predictiveBackGestureEnabled": true,
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
     },
     "androidStatusBar": {
       "translucent": false
@@ -32,18 +35,30 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#062D64",
-          "image": "./assets/images/campus-space-icon.png",
+          "image": "./assets/images/space-sync-icon.png",
           "imageWidth": 180
         }
       ],
       "expo-secure-store",
-      ["expo-camera", { "cameraPermission": "Allow CampusSpace to scan room QR codes", "recordAudioAndroid": false }],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow space-sync to scan room QR codes",
+          "recordAudioAndroid": false
+        }
+      ],
       "expo-notifications",
       "expo-sqlite",
       "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a097d55a-63f0-46ad-9620-37d5be6dc660"
+      }
     }
   }
 }

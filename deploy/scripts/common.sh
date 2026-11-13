@@ -5,11 +5,11 @@ set -Eeuo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEPLOY_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 PROJECT_DIR="$(cd "${DEPLOY_DIR}/.." && pwd)"
-ENV_FILE="${CAMPUSSPACE_ENV_FILE:-${DEPLOY_DIR}/.env.vps}"
+ENV_FILE="${SPACE_SYNC_ENV_FILE:-${DEPLOY_DIR}/.env.vps}"
 COMPOSE_FILE="${DEPLOY_DIR}/docker-compose.vps.yml"
 
 fail() {
-  printf 'CampusSpace deployment error: %s\n' "$1" >&2
+  printf 'space-sync deployment error: %s\n' "$1" >&2
   exit 1
 }
 

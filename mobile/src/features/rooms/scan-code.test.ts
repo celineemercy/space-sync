@@ -7,13 +7,13 @@ const room: Room = {
 };
 
 describe("room QR lookup", () => {
-  it("finds a room from its label code or CampusSpace QR payload", () => {
+  it("finds a room from its label code or space-sync QR payload", () => {
     expect(findScannedRoom("a-101", [room])).toBe(room);
-    expect(findScannedRoom("campusspace:room:A-101", [room])).toBe(room);
+    expect(findScannedRoom("space-sync:room:A-101", [room])).toBe(room);
   });
 
   it("rejects unknown and unrelated QR payloads", () => {
-    expect(findScannedRoom("campusspace:room:B-999", [room])).toBeNull();
+    expect(findScannedRoom("space-sync:room:B-999", [room])).toBeNull();
     expect(findScannedRoom("https://unrelated.example/a-101", [room])).toBeNull();
   });
 });

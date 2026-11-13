@@ -1,18 +1,18 @@
 import type { Reservation, Room } from "@/types/domain";
 
-const ROOMS_KEY = "campus-space.cached-rooms";
-const ROOMS_UPDATED_AT_KEY = "campus-space.cached-rooms-updated-at";
+const ROOMS_KEY = "space-sync.cached-rooms";
+const ROOMS_UPDATED_AT_KEY = "space-sync.cached-rooms-updated-at";
 
 function storage(): Storage | null {
   return typeof window === "undefined" ? null : window.localStorage;
 }
 
 function reservationsKey(userId: string) {
-  return `campus-space.cached-reservations:${userId}`;
+  return `space-sync.cached-reservations:${userId}`;
 }
 
 function reservationsUpdatedAtKey(userId: string) {
-  return `campus-space.cached-reservations-updated-at:${userId}`;
+  return `space-sync.cached-reservations-updated-at:${userId}`;
 }
 
 function parseArray<T>(value: string | null | undefined): T[] {

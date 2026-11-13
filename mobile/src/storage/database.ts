@@ -1,7 +1,7 @@
 import * as SQLite from "expo-sqlite";
 import type { Facility, Reservation, Room } from "@/types/domain";
 
-const databasePromise = SQLite.openDatabaseAsync("campus-space.db");
+const databasePromise = SQLite.openDatabaseAsync("space-sync.db");
 
 export async function initializeDatabase() {
   const database = await databasePromise;

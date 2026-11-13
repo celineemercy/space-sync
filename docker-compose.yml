@@ -5,15 +5,15 @@ services:
     image: postgres:17-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-campus_space}
-      POSTGRES_USER: ${POSTGRES_USER:-campus_space}
+      POSTGRES_DB: ${POSTGRES_DB:-space_sync}
+      POSTGRES_USER: ${POSTGRES_USER:-space_sync}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in the root .env file}
     ports:
       - "${POSTGRES_PORT:-5433}:5432"
     volumes:
-      - campus_space_postgres:/var/lib/postgresql/data
+      - space_sync_postgres:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U campus_space -d campus_space"]
+      test: ["CMD-SHELL", "pg_isready -U space_sync -d space_sync"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -26,7 +26,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgresql://${POSTGRES_USER:-campus_space}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-campus_space}?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-space_sync}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-space_sync}?schema=public
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the root .env file}
       JWT_EXPIRES_IN: 1h
       CAMPUS_TIMEZONE: Asia/Jakarta
@@ -70,4 +70,4 @@ services:
       retries: 10
 
 volumes:
-  campus_space_postgres:
+  space_sync_postgres:

@@ -9,7 +9,7 @@ require_environment
 
 cd "${PROJECT_DIR}"
 
-printf 'Building the CampusSpace API image...\n'
+printf 'Building the space-sync API image...\n'
 compose build --pull server
 
 printf 'Starting PostgreSQL...\n'
@@ -35,7 +35,7 @@ printf 'Waiting for public HTTPS health check...\n'
 for attempt in {1..30}; do
   if curl --fail --silent --show-error "https://${api_domain}/api/v1/health" >/dev/null; then
     compose ps
-    printf 'CampusSpace is available at https://%s/api/v1\n' "${api_domain}"
+    printf 'space-sync is available at https://%s/api/v1\n' "${api_domain}"
     exit 0
   fi
   sleep 2

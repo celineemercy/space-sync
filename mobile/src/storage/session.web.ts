@@ -1,7 +1,7 @@
 import type { User } from "@/types/domain";
 
-const TOKEN_KEY = "campus-space.access-token";
-const USER_KEY = "campus-space.user";
+const TOKEN_KEY = "space-sync.access-token";
+const USER_KEY = "space-sync.user";
 
 function storage(): Storage | null {
   return typeof window === "undefined" ? null : window.localStorage;

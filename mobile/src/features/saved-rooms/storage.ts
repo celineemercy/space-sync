@@ -5,7 +5,7 @@ import type {
   UpdateSavedRoomInput,
 } from "@/features/saved-rooms/model";
 
-const databasePromise = SQLite.openDatabaseAsync("campus-space.db");
+const databasePromise = SQLite.openDatabaseAsync("space-sync.db");
 let initializationPromise: Promise<void> | null = null;
 
 type SavedRoomRow = {
