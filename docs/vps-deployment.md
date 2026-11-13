@@ -1,6 +1,6 @@
-# CampusSpace VPS Deployment Guide
+# space-sync VPS Deployment Guide
 
-This guide deploys the CampusSpace prototype API to one Ubuntu VPS with Docker Compose. PostgreSQL is private, the NestJS API is private, and Caddy is the only public container. Caddy obtains and renews TLS certificates automatically.
+This guide deploys the space-sync prototype API to one Ubuntu VPS with Docker Compose. PostgreSQL is private, the NestJS API is private, and Caddy is the only public container. Caddy obtains and renews TLS certificates automatically.
 
 ## 1. Deployment Topology
 
@@ -38,7 +38,7 @@ Recommended prototype VPS:
 - 20 GB or more SSD storage
 - A static public IPv4 address
 
-Create an `A` record such as `api.campusspace.example.com` pointing to the VPS IPv4 address. Add an `AAAA` record only when IPv6 is configured and reachable. Wait for DNS resolution before the first deployment so Caddy can obtain a certificate.
+Create an `A` record such as `api.space-sync.example.com` pointing to the VPS IPv4 address. Add an `AAAA` record only when IPv6 is configured and reachable. Wait for DNS resolution before the first deployment so Caddy can obtain a certificate.
 
 ## 3. Bootstrap Ubuntu
 
@@ -47,10 +47,10 @@ Connect through SSH, install Git if necessary, and clone the repository:
 ```bash
 sudo apt-get update
 sudo apt-get install -y git
-sudo mkdir -p /opt/campus-space
-sudo chown "$USER":"$USER" /opt/campus-space
-git clone https://github.com/celineemercy/space-sync.git /opt/campus-space
-cd /opt/campus-space
+sudo mkdir -p /opt/space-sync
+sudo chown "$USER":"$USER" /opt/space-sync
+git clone https://github.com/celineemercy/space-sync.git /opt/space-sync
+cd /opt/space-sync
 git switch dev
 ```
 
@@ -67,7 +67,7 @@ It installs Docker Engine and the Compose plugin from Docker's official Ubuntu r
 Create the ignored VPS environment file:
 
 ```bash
-cd /opt/campus-space
+cd /opt/space-sync
 cp deploy/.env.vps.example deploy/.env.vps
 chmod 600 deploy/.env.vps
 ```
@@ -85,13 +85,13 @@ Use the first value as `POSTGRES_PASSWORD`, the second as `JWT_SECRET`, and the 
 Edit `deploy/.env.vps`:
 
 ```dotenv
-API_DOMAIN=api.campusspace.example.com
+API_DOMAIN=api.space-sync.example.com
 TLS_EMAIL=operator@example.com
 
-POSTGRES_DB=campus_space
-POSTGRES_USER=campus_space
+POSTGRES_DB=space_sync
+POSTGRES_USER=space_sync
 POSTGRES_PASSWORD=<generated-database-password>
-DATABASE_URL=postgresql://campus_space:<same-database-password>@db:5432/campus_space?schema=public
+DATABASE_URL=postgresql://space_sync:<same-database-password>@db:5432/space_sync?schema=public
 
 JWT_SECRET=<generated-jwt-secret>
 JWT_EXPIRES_IN=1h
@@ -110,7 +110,7 @@ BACKUP_RETENTION_DAYS=14
 Run:
 
 ```bash
-cd /opt/campus-space
+cd /opt/space-sync
 ./deploy/scripts/deploy.sh
 ```
 
@@ -133,7 +133,7 @@ docker compose --env-file deploy/.env.vps -f deploy/docker-compose.vps.yml logs 
 The expected public endpoint is:
 
 ```text
-https://api.campusspace.example.com/api/v1/health
+https://api.space-sync.example.com/api/v1/health
 ```
 
 ## 6. Seed Demo Data Intentionally
@@ -159,13 +159,13 @@ Backups are stored under the ignored `deploy/backups/` directory with owner-only
 Example daily cron entry for the deployment user:
 
 ```cron
-15 2 * * * /opt/campus-space/deploy/scripts/backup.sh >> /opt/campus-space/deploy/backups/backup.log 2>&1
+15 2 * * * /opt/space-sync/deploy/scripts/backup.sh >> /opt/space-sync/deploy/backups/backup.log 2>&1
 ```
 
 Restore is deliberately guarded and accepts only files inside `deploy/backups/`:
 
 ```bash
-./deploy/scripts/restore.sh --confirm deploy/backups/campus-space-YYYYMMDDTHHMMSSZ.sql.gz
+./deploy/scripts/restore.sh --confirm deploy/backups/space-sync-YYYYMMDDTHHMMSSZ.sql.gz
 ```
 
 Take a fresh backup before a restore. Restore replaces database objects represented in the dump and restarts the API afterward.
@@ -175,7 +175,7 @@ Take a fresh backup before a restore. Restore replaces database objects represen
 Deploy only committed code from `dev`:
 
 ```bash
-cd /opt/campus-space
+cd /opt/space-sync
 git status --short
 git fetch origin dev
 git switch dev
@@ -201,13 +201,13 @@ The `Deploy VPS` workflow is manual and runs only from `dev`. Create a protected
 
 Environment variable:
 
-- `VPS_API_DOMAIN`: domain only, such as `api.campusspace.example.com`
+- `VPS_API_DOMAIN`: domain only, such as `api.space-sync.example.com`
 
 Environment secrets:
 
 - `VPS_HOST`: VPS hostname or IP
 - `VPS_USER`: non-root deployment account
-- `VPS_APP_PATH`: `/opt/campus-space`
+- `VPS_APP_PATH`: `/opt/space-sync`
 - `VPS_SSH_PRIVATE_KEY`: dedicated deployment private key
 - `VPS_KNOWN_HOSTS`: verified output from `ssh-keyscan` collected over a trusted channel
 
@@ -215,12 +215,16 @@ Add the matching public key to the deployment user's `~/.ssh/authorized_keys`. T
 
 ## 10. Connect the Android Build
 
+Before testing admin approval, apply the database migration and provision one administrator with a unique email. Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` (at least 12 characters) only in the shell running `npm run admin:provision`; do not place them in tracked files or container configuration. The application stores uploaded permission documents in the private `document_data` Docker volume. `deploy/scripts/backup.sh` creates a matching `.documents.tar.gz` alongside each database backup, and restore requires both files.
+
+Existing reservations remain `CONFIRMED` after migration. New student requests require one PDF/JPG/PNG document up to 10 MB and start as `PENDING`; a pending request holds its room slot until decided, cancelled, or expired at its start time.
+
 The APK must use the public HTTPS API, not `localhost`, `10.0.2.2`, or a private LAN address. From `mobile/`, after authenticating with the project owner's Expo account:
 
 ```bash
 npx eas-cli@latest env:set \
   --name EXPO_PUBLIC_API_URL \
-  --value https://api.campusspace.example.com/api/v1 \
+  --value https://api.space-sync.example.com/api/v1 \
   --environment preview \
   --visibility plaintext
 ```

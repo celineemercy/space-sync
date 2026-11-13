@@ -1,6 +1,6 @@
-# CampusSpace
+# space-sync
 
-CampusSpace is a campus room discovery and reservation app built for Android. Students can find suitable rooms, check schedule-aware availability, reserve a room, and manage their bookings.
+space-sync is a campus room discovery and reservation app built for Android. Students can find suitable rooms, check schedule-aware availability, reserve a room, and manage their bookings.
 
 ## Features
 
@@ -8,7 +8,7 @@ CampusSpace is a campus room discovery and reservation app built for Android. St
 - Room listing, details, and saved rooms
 - Date, time, capacity, and facility filters
 - Schedule-aware availability checks
-- Reservation creation and cancellation
+- Permission document upload, admin approval or rejection, and cancellation
 - Booking conflict prevention
 - QR room scanning and local reminders
 - Offline caching for important data
@@ -68,6 +68,8 @@ npm test
 ```
 
 The server also supports `npm run build` and `npm run test:smoke`.
+
+Student reservation requests require one PDF, JPG, or PNG permission file up to 10 MB. Requests hold a room while `PENDING`; an admin account reviews the file and approves or rejects the request in the same app. Provision admin accounts from the server with `npm run build` followed by `ADMIN_EMAIL` and `ADMIN_PASSWORD` set for `npm run admin:provision`. The server stores files in a private directory set by `DOCUMENT_STORAGE_DIR`; the VPS Compose setup mounts and backs up a dedicated volume.
 
 ## Documentation
 

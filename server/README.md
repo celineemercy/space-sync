@@ -1,6 +1,6 @@
-# CampusSpace API
+# space-sync API
 
-NestJS 12 API for CampusSpace. It provides JWT authentication, room and facility queries, schedule-aware availability, transactional reservation creation, current-user reservations, cancellation, and a database-aware health endpoint.
+NestJS 12 API for space-sync. It provides JWT authentication, room and facility queries, schedule-aware availability, permission document uploads, admin decisions, current-user reservations, cancellation, and a database-aware health endpoint.
 
 ## Recommended local setup with Docker
 
@@ -22,7 +22,7 @@ npm ci
 npm run test:smoke
 ```
 
-The smoke test covers health, authentication, room listing, availability, concurrent conflict prevention, reservation listing, and cancellation. It cleans up its temporary confirmed reservation.
+The smoke test covers health, authentication, room listing, availability, multipart upload, concurrent conflict prevention, reservation listing, and cancellation. It cleans up its temporary pending request.
 
 ## Native development
 
@@ -35,6 +35,8 @@ npm run db:migrate
 npm run db:seed
 npm run start:dev
 ```
+
+Set `DOCUMENT_STORAGE_DIR` to a private, persistent directory outside any public web root. The default for local development is `server/private-documents`. To provision an admin, build the server and set `ADMIN_EMAIL` and `ADMIN_PASSWORD` (at least 12 characters) for `npm run admin:provision`. No admin credentials are stored in the repository. Student requests require one PDF, JPG, or PNG file up to 10 MB. Pending requests expire at their start time, and stored files are removed after the 90-day retention period.
 
 ## Quality checks
 
