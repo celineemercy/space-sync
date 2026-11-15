@@ -19,7 +19,7 @@ jest.mock("@tanstack/react-query", () => ({
     student: { id: "student-1", email: "student@example.test" },
     document: { name: "permit.pdf", mime: "application/pdf", size: 100 },
   } }),
-  useMutation: () => ({ mutate: mockMutate, isPending: false, error: null }),
+  useMutation: () => ({ mutate: mockMutate, reset: jest.fn(), isPending: false, error: null }),
 }));
 
 it("requires a reason before the admin can confirm rejection", async () => {

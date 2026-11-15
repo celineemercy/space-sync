@@ -5,6 +5,19 @@ describe("date and time helpers", () => {
     const picked = new Date(2026, 8, 21, 9, 0);
     expect(toCampusInstant(picked).toISOString()).toBe("2026-09-21T02:00:00.000Z");
   });
+
+  it("keeps 09:00 Jakarta when the device timezone differs", () => {
+    const previous = process.env.TZ;
+    try {
+      for (const zone of ["Asia/Makassar", "America/Los_Angeles"]) {
+        process.env.TZ = zone;
+        const picked = new Date(2030, 0, 15, 9, 0);
+        expect(toCampusInstant(picked).toISOString()).toBe("2030-01-15T02:00:00.000Z");
+      }
+    } finally {
+      process.env.TZ = previous;
+    }
+  });
   it("combines the selected date with the selected local time", () => {
     const date = new Date(2026, 8, 21, 0, 0);
     const time = new Date(2026, 0, 1, 13, 45);

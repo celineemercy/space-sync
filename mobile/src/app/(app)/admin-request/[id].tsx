@@ -13,6 +13,7 @@ import { decideRequest, getAdminRequest } from "@/features/admin/repository";
 import { openPermissionDocument } from "@/features/admin/open-document";
 import { useAuth } from "@/providers/auth-provider";
 import { toCampusLabel } from "@/lib/date-time";
+import { logRuntime } from "@/lib/runtime-log";
 
 export default function AdminRequestScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -30,7 +31,7 @@ export default function AdminRequestScreen() {
       await Promise.all([client.invalidateQueries({ queryKey: ["admin-requests"] }), client.invalidateQueries({ queryKey: ["admin-request", id] })]);
       router.back();
     },
-    onError: () => { setDecision(null); void query.refetch(); },
+    onError: () => { logRuntime("warn", "admin_decision_failed"); void query.refetch(); },
   });
   if (user?.role !== "ADMIN") return <Screen><Text>Admin access required.</Text></Screen>;
   if (query.isLoading) return <Screen><LoadingState label="Loading request..." /></Screen>;
@@ -47,15 +48,15 @@ export default function AdminRequestScreen() {
       <Text style={styles.label}>Permission document</Text>
       <AppButton label={`Open ${item.document?.name ?? "document"}`} variant="secondary" disabled={!item.document} onPress={async () => {
         try { setOpenError(null); await openPermissionDocument(accessToken!, id, item.document?.mime ?? "application/pdf"); }
-        catch { setOpenError("Unable to open the document. Try again."); }
+        catch { logRuntime("warn", "document_open_failed"); setOpenError("Unable to open the document. Try again."); }
       }} />
       {openError ? <StatusMessage error={new Error(openError)} /> : null}
     </View>
     {mutation.error ? <StatusMessage error={mutation.error} /> : null}
     {item.status === "PENDING" ? <View style={styles.card}>
       <FormField label="Rejection reason" value={reason} onChangeText={setReason} maxLength={500} multiline placeholder="Required if rejecting" />
-      <AppButton label="Approve request" onPress={() => setDecision("approve")} />
-      <AppButton label="Reject request" variant="danger" disabled={!reason.trim()} onPress={() => setDecision("reject")} />
+      <AppButton label="Approve request" onPress={() => { mutation.reset(); setDecision("approve"); }} />
+      <AppButton label="Reject request" variant="danger" disabled={!reason.trim()} onPress={() => { mutation.reset(); setDecision("reject"); }} />
     </View> : null}
     <ConfirmationDialog visible={decision !== null} title={decision === "approve" ? "Approve this request?" : "Reject this request?"} description={`${item.room.name} · ${toCampusLabel(item.startsAt)} – ${toCampusLabel(item.endsAt)}. ${decision === "approve" ? `Confirm for ${item.student.email}?` : `Reason: ${reason.trim()}`}`} confirmLabel={decision === "approve" ? "Approve" : "Reject"} cancelLabel="Go back" tone={decision === "reject" ? "danger" : undefined} loading={mutation.isPending} error={mutation.error} onClose={() => setDecision(null)} onConfirm={() => { if (decision) mutation.mutate(decision); }} />
   </Screen>;
