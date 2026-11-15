@@ -14,6 +14,7 @@ import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Colors, Fonts } from "@/constants/theme";
 import { AppProviders } from "@/providers/app-providers";
+import { RuntimeDiagnostics } from "@/components/runtime-diagnostics";
 import "@/features/reminders/reminders";
 
 void SplashScreen.preventAutoHideAsync();
@@ -37,6 +38,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AppProviders>
+        <RuntimeDiagnostics />
         <StatusBar style="dark" />
         <Stack
           screenOptions={{

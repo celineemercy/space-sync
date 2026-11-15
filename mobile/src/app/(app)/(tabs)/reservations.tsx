@@ -13,6 +13,7 @@ import {
   useReservations,
 } from "@/features/reservations/queries";
 import { toCampusLabel } from "@/lib/date-time";
+import { logRuntime } from "@/lib/runtime-log";
 import { useAuth } from "@/providers/auth-provider";
 import type { Reservation } from "@/types/domain";
 
@@ -67,7 +68,7 @@ export default function ReservationsScreen() {
       await cancellation.mutateAsync(reservationToCancel.id);
       setReservationToCancel(null);
     } catch {
-      // The mutation error remains visible beneath the dialog.
+      logRuntime("warn", "cancellation_failed");
     }
   };
 
@@ -172,11 +173,11 @@ function ReservationSection({
         <View key={reservation.id} style={styles.card}>
           <View style={styles.row}>
             <View style={styles.flex}>
-              <Text style={styles.code}>{reservation.room.code}</Text>
-              <Text style={styles.title}>{reservation.room.name}</Text>
+              <Text importantForAccessibility="no" style={styles.code}>{reservation.room.code}</Text>
+              <Text importantForAccessibility="no" style={styles.title}>{reservation.room.name}</Text>
             </View>
             <Text
-              accessibilityLabel={`${reservation.room.name}, ${toCampusLabel(reservation.startsAt)}, ${statusLabel(reservation, now)}`}
+              accessibilityLabel={`Room ${reservation.room.code}, ${reservation.room.name}, ${toCampusLabel(reservation.startsAt)} to ${toCampusLabel(reservation.endsAt)}, ${statusLabel(reservation, now)}`}
               style={[
                 styles.status,
                 ["CANCELLED", "EXPIRED"].includes(reservation.status) && styles.cancelled,
@@ -187,10 +188,10 @@ function ReservationSection({
               {statusLabel(reservation, now)}
             </Text>
           </View>
-          {onCancel ? <Text style={styles.location}>{reservation.room.location}</Text> : null}
-          <Text style={styles.time}>{toCampusLabel(reservation.startsAt)}</Text>
-          {reservation.rejectionReason ? <Text style={styles.reason}>Reason: {reservation.rejectionReason}</Text> : null}
-          {onCancel ? <Text style={styles.time}>
+          {onCancel ? <Text importantForAccessibility="no" style={styles.location}>{reservation.room.location}</Text> : null}
+          <Text importantForAccessibility="no" style={styles.time}>{toCampusLabel(reservation.startsAt)}</Text>
+          {reservation.rejectionReason ? <Text accessibilityLabel={`Rejection reason: ${reservation.rejectionReason}`} style={styles.reason}>Reason: {reservation.rejectionReason}</Text> : null}
+          {onCancel ? <Text importantForAccessibility="no" style={styles.time}>
             Until {toCampusLabel(reservation.endsAt)}
           </Text> : null}
           {onCancel ? (

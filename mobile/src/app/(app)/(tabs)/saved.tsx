@@ -19,6 +19,7 @@ import {
   useUpdateSavedRoom,
 } from "@/features/saved-rooms/queries";
 import { useAuth } from "@/providers/auth-provider";
+import { logRuntime } from "@/lib/runtime-log";
 
 export default function SavedRoomsScreen() {
   const router = useRouter();
@@ -48,7 +49,7 @@ export default function SavedRoomsScreen() {
       setEditingId(null);
       setDraftNote("");
     } catch {
-      // Mutation errors stay visible next to the edit form.
+      logRuntime("warn", "saved_room_update_failed");
     }
   };
 
@@ -59,7 +60,7 @@ export default function SavedRoomsScreen() {
       if (editingId === roomToDelete.id) setEditingId(null);
       setRoomToDelete(null);
     } catch {
-      // Mutation errors stay visible above the saved-room list.
+      logRuntime("warn", "saved_room_delete_failed");
     }
   };
 

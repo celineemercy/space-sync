@@ -89,6 +89,7 @@ describe("ReservationsScreen primary states", () => {
     const screen = await render(<ReservationsScreen />);
     expect(screen.getByText("Campus Room")).toBeTruthy();
     expect(screen.getByText("Approved")).toBeTruthy();
+    expect(screen.getByLabelText(/Room A1, Campus Room, .*Approved/)).toBeTruthy();
   });
 
   it("renders the empty state", async () => {

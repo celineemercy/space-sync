@@ -15,6 +15,7 @@ import {
   useSaveRoom,
 } from "@/features/saved-rooms/queries";
 import { toCampusLabel } from "@/lib/date-time";
+import { logRuntime } from "@/lib/runtime-log";
 
 function first(value: string | string[] | undefined): string {
   return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
@@ -50,6 +51,7 @@ export default function RoomDetailScreen() {
       setDocument(selected);
       setDocumentError(null);
     } catch {
+      logRuntime("warn", "document_picker_failed");
       setDocumentError("Unable to open your files. Try again.");
     }
   };
@@ -60,7 +62,7 @@ export default function RoomDetailScreen() {
       await reservation.mutateAsync({ roomId, startsAt, endsAt, document: { uri: document.uri, name: document.name, mimeType: document.mimeType ?? "application/octet-stream", size: document.size, file: document.file } });
       setDialog("success");
     } catch {
-      // The mutation error is rendered below so the selected interval remains visible.
+      logRuntime("warn", "booking_failed");
     }
   };
 
@@ -96,7 +98,7 @@ export default function RoomDetailScreen() {
     try {
       await saveRoom.mutateAsync({ room });
     } catch {
-      // The local persistence error is rendered in the same card.
+      logRuntime("warn", "saved_room_write_failed");
     }
   };
 
