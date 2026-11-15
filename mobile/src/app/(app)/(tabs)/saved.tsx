@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 import { AppButton } from "@/components/ui/app-button";
 import { ErrorState, LoadingState } from "@/components/ui/async-state";
 import { AppHeader } from "@/components/ui/app-header";
@@ -29,6 +29,11 @@ export default function SavedRoomsScreen() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftNote, setDraftNote] = useState("");
   const [roomToDelete, setRoomToDelete] = useState<SavedRoom | null>(null);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<"recent" | "code" | "capacity">("recent");
+  const filteredRooms = (savedRooms.data ?? []).filter((room) =>
+    [room.code, room.name, room.location, room.note].some((value) => value.toLowerCase().includes(search.trim().toLowerCase())),
+  ).sort((a, b) => sort === "code" ? a.code.localeCompare(b.code) : sort === "capacity" ? b.capacity - a.capacity : b.updatedAt.localeCompare(a.updatedAt));
 
   const startEditing = (savedRoom: SavedRoom) => {
     updateSavedRoom.reset();
@@ -66,6 +71,11 @@ export default function SavedRoomsScreen() {
         accountLabel={user?.email}
       />
       <Screen contentContainerStyle={styles.content}>
+        <TextInput accessibilityLabel="Search saved rooms" placeholder="Search saved rooms" value={search} onChangeText={setSearch} style={styles.search} />
+        <View style={styles.actions}>
+          {(["recent", "code", "capacity"] as const).map((option) => <AppButton key={option} label={option === "recent" ? "Recent" : option === "code" ? "Code" : "Capacity"} variant={sort === option ? "primary" : "secondary"} onPress={() => setSort(option)} style={styles.action} />)}
+        </View>
+        <Text style={styles.location}>{filteredRooms.length} results</Text>
         {deleteSavedRoom.error ? (
           <StatusMessage error={deleteSavedRoom.error} />
         ) : null}
@@ -78,8 +88,8 @@ export default function SavedRoomsScreen() {
             retrying={savedRooms.isFetching}
             onRetry={() => void savedRooms.refetch()}
           />
-        ) : savedRooms.data?.length ? (
-          savedRooms.data.map((savedRoom) => (
+        ) : filteredRooms.length ? (
+          filteredRooms.map((savedRoom) => (
             <View key={savedRoom.id} style={styles.card}>
               <View style={styles.cardHeader}>
                 <View style={styles.flex}>
@@ -157,7 +167,7 @@ export default function SavedRoomsScreen() {
           ))
         ) : (
           <View style={styles.empty}>
-            <Text style={styles.emptyTitle}>No saved rooms yet</Text>
+            <Text style={styles.emptyTitle}>{savedRooms.data?.length ? "No matching saved rooms" : "No saved rooms yet"}</Text>
             <Text style={styles.emptyText}>
               Open a room from Search and choose Save room locally.
             </Text>
@@ -177,6 +187,7 @@ export default function SavedRoomsScreen() {
         cancelLabel="Keep room"
         tone="danger"
         loading={deleteSavedRoom.isPending}
+        error={deleteSavedRoom.error}
         onClose={() => setRoomToDelete(null)}
         onConfirm={confirmDelete}
       />
@@ -187,6 +198,7 @@ export default function SavedRoomsScreen() {
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: Colors.background },
   content: { paddingTop: Spacing.md },
+  search: { backgroundColor: Colors.surface, borderColor: Colors.border, borderWidth: 1, borderRadius: Radius.md, padding: Spacing.md, color: Colors.text },
   card: {
     backgroundColor: Colors.surface,
     borderRadius: Radius.lg,

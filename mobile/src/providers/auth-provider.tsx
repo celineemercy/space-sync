@@ -10,6 +10,7 @@ import {
 import { setUnauthorizedHandler } from "@/lib/api";
 import { authRepository } from "@/features/auth/repository";
 import { clearReminders } from "@/features/reminders/reminders";
+import { clearSavedRooms } from "@/features/saved-rooms/storage";
 import {
   clearCachedReservations,
   initializeDatabase,
@@ -40,6 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     queryClient.clear();
     await clearSession();
     try { await clearReminders(); } catch { /* Session cleanup should still finish. */ }
+    await clearSavedRooms();
     if (userId) await clearCachedReservations(userId);
   }, [queryClient, user?.id]);
 

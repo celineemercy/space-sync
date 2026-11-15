@@ -82,7 +82,12 @@ export async function insertSavedRoom({
     updatedAt: timestamp,
   };
 
-  await database.runAsync(
+  const existing = await database.getFirstAsync<SavedRoomRow>(
+    "SELECT * FROM saved_rooms WHERE room_id = ?", room.id,
+  );
+  if (existing) throw new Error("Room is already saved.");
+
+  try { await database.runAsync(
     `INSERT INTO saved_rooms
       (id, room_id, code, name, location, capacity, note, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -95,8 +100,19 @@ export async function insertSavedRoom({
     savedRoom.note,
     savedRoom.createdAt,
     savedRoom.updatedAt,
-  );
+  ); } catch (error) {
+    if (error instanceof Error && /UNIQUE constraint failed/.test(error.message)) {
+      throw new Error("Room is already saved.");
+    }
+    throw error;
+  }
   return savedRoom;
+}
+
+export async function clearSavedRooms(): Promise<void> {
+  await ensureTable();
+  const database = await databasePromise;
+  await database.runAsync("DELETE FROM saved_rooms");
 }
 
 export async function updateSavedRoom({

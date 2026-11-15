@@ -79,3 +79,7 @@ export async function removeSavedRoom(id: string): Promise<void> {
   }
   write(remaining);
 }
+
+export async function clearSavedRooms(): Promise<void> {
+  localStorage()?.removeItem(STORAGE_KEY);
+}
