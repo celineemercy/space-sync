@@ -9,6 +9,7 @@ const databasePromise = SQLite.openDatabaseAsync("space-sync.db");
 let initializationPromise: Promise<void> | null = null;
 
 type SavedRoomRow = {
+  user_id: string;
   id: string;
   room_id: string;
   code: string;
@@ -37,33 +38,40 @@ function toModel(row: SavedRoomRow): SavedRoom {
 async function ensureTable() {
   initializationPromise ??= (async () => {
     const database = await databasePromise;
+    const columns = await database.getAllAsync<{ name: string }>("PRAGMA table_info(saved_rooms)");
+    if (columns.length && !columns.some((column) => column.name === "user_id")) {
+      // Legacy rows have no owner; discard them rather than expose notes to another account.
+      await database.execAsync("DROP TABLE saved_rooms");
+    }
     await database.execAsync(`
       CREATE TABLE IF NOT EXISTS saved_rooms (
-        id TEXT PRIMARY KEY NOT NULL,
-        room_id TEXT UNIQUE NOT NULL,
+        user_id TEXT NOT NULL,
+        id TEXT NOT NULL,
+        room_id TEXT NOT NULL,
         code TEXT NOT NULL,
         name TEXT NOT NULL,
         location TEXT NOT NULL,
         capacity INTEGER NOT NULL,
         note TEXT NOT NULL,
         created_at TEXT NOT NULL,
-        updated_at TEXT NOT NULL
+        updated_at TEXT NOT NULL,
+        PRIMARY KEY (user_id, room_id)
       );
     `);
   })();
   return initializationPromise;
 }
 
-export async function readSavedRooms(): Promise<SavedRoom[]> {
+export async function readSavedRooms(userId: string): Promise<SavedRoom[]> {
   await ensureTable();
   const database = await databasePromise;
   const rows = await database.getAllAsync<SavedRoomRow>(
-    "SELECT * FROM saved_rooms ORDER BY updated_at DESC",
+    "SELECT * FROM saved_rooms WHERE user_id = ? ORDER BY updated_at DESC", userId,
   );
   return rows.map(toModel);
 }
 
-export async function insertSavedRoom({
+export async function insertSavedRoom(userId: string, {
   room,
   note = "",
 }: CreateSavedRoomInput): Promise<SavedRoom> {
@@ -83,14 +91,15 @@ export async function insertSavedRoom({
   };
 
   const existing = await database.getFirstAsync<SavedRoomRow>(
-    "SELECT * FROM saved_rooms WHERE room_id = ?", room.id,
+    "SELECT * FROM saved_rooms WHERE user_id = ? AND room_id = ?", userId, room.id,
   );
   if (existing) throw new Error("Room is already saved.");
 
   try { await database.runAsync(
     `INSERT INTO saved_rooms
-      (id, room_id, code, name, location, capacity, note, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (user_id, id, room_id, code, name, location, capacity, note, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    userId,
     savedRoom.id,
     savedRoom.roomId,
     savedRoom.code,
@@ -109,13 +118,7 @@ export async function insertSavedRoom({
   return savedRoom;
 }
 
-export async function clearSavedRooms(): Promise<void> {
-  await ensureTable();
-  const database = await databasePromise;
-  await database.runAsync("DELETE FROM saved_rooms");
-}
-
-export async function updateSavedRoom({
+export async function updateSavedRoom(userId: string, {
   id,
   note,
 }: UpdateSavedRoomInput): Promise<SavedRoom> {
@@ -123,27 +126,26 @@ export async function updateSavedRoom({
   const database = await databasePromise;
   const updatedAt = new Date().toISOString();
   const result = await database.runAsync(
-    "UPDATE saved_rooms SET note = ?, updated_at = ? WHERE id = ?",
+    "UPDATE saved_rooms SET note = ?, updated_at = ? WHERE user_id = ? AND id = ?",
     note,
     updatedAt,
+    userId,
     id,
   );
   if (!result.changes) throw new Error("Saved room was not found.");
 
   const row = await database.getFirstAsync<SavedRoomRow>(
-    "SELECT * FROM saved_rooms WHERE id = ?",
-    id,
+    "SELECT * FROM saved_rooms WHERE user_id = ? AND id = ?", userId, id,
   );
   if (!row) throw new Error("Saved room was not found.");
   return toModel(row);
 }
 
-export async function removeSavedRoom(id: string): Promise<void> {
+export async function removeSavedRoom(userId: string, id: string): Promise<void> {
   await ensureTable();
   const database = await databasePromise;
   const result = await database.runAsync(
-    "DELETE FROM saved_rooms WHERE id = ?",
-    id,
+    "DELETE FROM saved_rooms WHERE user_id = ? AND id = ?", userId, id,
   );
   if (!result.changes) throw new Error("Saved room was not found.");
 }

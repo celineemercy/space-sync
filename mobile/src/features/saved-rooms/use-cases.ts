@@ -9,30 +9,34 @@ import {
 } from "@/features/saved-rooms/repository";
 
 export function listSavedRooms(
+  userId: string,
   repository: SavedRoomsRepository = savedRoomsRepository,
 ) {
-  return repository.list();
+  return repository.list(userId);
 }
 
 export function saveRoom(
+  userId: string,
   input: CreateSavedRoomInput,
   repository: SavedRoomsRepository = savedRoomsRepository,
 ) {
-  return repository.create({ ...input, note: normalizeNote(input.note ?? "") });
+  return repository.create(userId, { ...input, note: normalizeNote(input.note ?? "") });
 }
 
 export function changeSavedRoomNote(
+  userId: string,
   input: UpdateSavedRoomInput,
   repository: SavedRoomsRepository = savedRoomsRepository,
 ) {
-  return repository.update({ ...input, note: normalizeNote(input.note) });
+  return repository.update(userId, { ...input, note: normalizeNote(input.note) });
 }
 
 export function deleteSavedRoom(
+  userId: string,
   id: string,
   repository: SavedRoomsRepository = savedRoomsRepository,
 ) {
-  return repository.delete(id);
+  return repository.delete(userId, id);
 }
 
 function normalizeNote(note: string) {

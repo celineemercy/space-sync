@@ -61,28 +61,30 @@ it("keeps CRUD data after the storage module is reloaded", async () => {
     typeof import("@/features/saved-rooms/storage.web")
   >("@/features/saved-rooms/storage.web");
 
-  const created = await storage.insertSavedRoom({
+  const created = await storage.insertSavedRoom("student-a", {
     room,
     note: "Near the reference desk",
   });
   expect(created.roomId).toBe(room.id);
-  expect(await storage.readSavedRooms()).toEqual([created]);
+  expect(await storage.readSavedRooms("student-a")).toEqual([created]);
+  expect(await storage.readSavedRooms("student-b")).toEqual([]);
 
   jest.resetModules();
   const storageAfterRefresh = jest.requireActual<
     typeof import("@/features/saved-rooms/storage.web")
   >("@/features/saved-rooms/storage.web");
-  expect(await storageAfterRefresh.readSavedRooms()).toEqual([created]);
+  expect(await storageAfterRefresh.readSavedRooms("student-a")).toEqual([created]);
 
-  const updated = await storageAfterRefresh.updateSavedRoom({
+  const updated = await storageAfterRefresh.updateSavedRoom("student-a", {
     id: created.id,
     note: "Bring a display adapter",
   });
   expect(updated.note).toBe("Bring a display adapter");
-  expect((await storageAfterRefresh.readSavedRooms())[0].note).toBe(
+  expect((await storageAfterRefresh.readSavedRooms("student-a"))[0].note).toBe(
     "Bring a display adapter",
   );
 
-  await storageAfterRefresh.removeSavedRoom(created.id);
-  expect(await storageAfterRefresh.readSavedRooms()).toEqual([]);
+  await expect(storageAfterRefresh.removeSavedRoom("student-b", created.id)).rejects.toThrow("Saved room was not found.");
+  await storageAfterRefresh.removeSavedRoom("student-a", created.id);
+  expect(await storageAfterRefresh.readSavedRooms("student-a")).toEqual([]);
 });

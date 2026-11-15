@@ -77,6 +77,15 @@ it("reads saved rooms from local persistence", async () => {
   expect(screen.getByText("Quiet after lunch")).toBeTruthy();
 });
 
+it("filters saved rooms by note and reports the result count", async () => {
+  const screen = await render(<SavedRoomsScreen />);
+  await fireEvent.changeText(screen.getByLabelText("Search saved rooms"), "quiet");
+  expect(screen.getByText("Campus Room")).toBeTruthy();
+  expect(screen.getByText("1 results")).toBeTruthy();
+  await fireEvent.changeText(screen.getByLabelText("Search saved rooms"), "missing");
+  expect(screen.getByText("No matching saved rooms")).toBeTruthy();
+});
+
 it("opens a saved room's details", async () => {
   const screen = await render(<SavedRoomsScreen />);
   await fireEvent.press(screen.getByLabelText("View Campus Room"));
