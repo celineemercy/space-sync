@@ -1,5 +1,5 @@
 import * as SQLite from "expo-sqlite";
-import type { Facility, Reservation, Room } from "@/types/domain";
+import type { AvailabilityResponse, Facility, Reservation, Room } from "@/types/domain";
 
 const databasePromise = SQLite.openDatabaseAsync("space-sync.db");
 
@@ -201,4 +201,21 @@ export async function clearCachedReservations(userId: string) {
       `reservations_updated_at:${userId}`,
     );
   });
+}
+
+export async function cacheAvailability(userId: string, key: string, value: AvailabilityResponse) {
+  const database = await databasePromise;
+  await database.runAsync("INSERT OR REPLACE INTO cache_metadata (key, value) VALUES (?, ?)", `availability:${userId}:${key}`, JSON.stringify({ value, updatedAt: new Date().toISOString() }));
+}
+
+export async function getCachedAvailability(userId: string, key: string): Promise<{ value: AvailabilityResponse; updatedAt: string } | null> {
+  const database = await databasePromise;
+  const row = await database.getFirstAsync<{ value: string }>("SELECT value FROM cache_metadata WHERE key = ?", `availability:${userId}:${key}`);
+  if (!row) return null;
+  try { return JSON.parse(row.value) as { value: AvailabilityResponse; updatedAt: string }; } catch { return null; }
+}
+
+export async function clearCachedAvailability(userId: string) {
+  const database = await databasePromise;
+  await database.runAsync("DELETE FROM cache_metadata WHERE key LIKE ?", `availability:${userId}:%`);
 }

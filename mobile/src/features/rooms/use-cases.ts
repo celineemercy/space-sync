@@ -3,6 +3,8 @@ import {
   type RoomsRepository,
 } from "@/features/rooms/repository";
 import type { AvailabilityInput } from "@/types/domain";
+import { cacheAvailability, getCachedAvailability } from "@/storage/database";
+import { ApiClientError } from "@/lib/api";
 
 export type RoomListResult = {
   rooms: Awaited<ReturnType<RoomsRepository["fetchAll"]>>;
@@ -42,10 +44,25 @@ export async function loadRoom(
   }
 }
 
-export function searchAvailableRooms(
+export function availabilityKey(input: AvailabilityInput) {
+  return JSON.stringify({ startsAt: input.startsAt, endsAt: input.endsAt, minCapacity: input.minCapacity ?? null, facilityIds: [...(input.facilityIds ?? [])].sort() });
+}
+
+export async function searchAvailableRooms(
   input: AvailabilityInput,
+  userId: string,
   accessToken?: string | null,
   repository: RoomsRepository = roomsRepository,
 ) {
-  return repository.searchAvailability(input, accessToken);
+  const key = availabilityKey(input);
+  try {
+    const result = await repository.searchAvailability(input, accessToken);
+    await cacheAvailability(userId, key, result);
+    return { ...result, stale: false, updatedAt: new Date().toISOString() };
+  } catch (error) {
+    if (!(error instanceof ApiClientError) || !["NETWORK_ERROR", "NETWORK_TIMEOUT"].includes(error.code)) throw error;
+    const cached = await getCachedAvailability(userId, key);
+    if (cached) return { ...cached.value, stale: true, updatedAt: cached.updatedAt };
+    throw error;
+  }
 }

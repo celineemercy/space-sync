@@ -8,11 +8,12 @@ import {
   useState,
 } from "react";
 import { setUnauthorizedHandler } from "@/lib/api";
+import { logRuntime } from "@/lib/runtime-log";
 import { authRepository } from "@/features/auth/repository";
 import { clearReminders } from "@/features/reminders/reminders";
-import { clearSavedRooms } from "@/features/saved-rooms/storage";
 import {
   clearCachedReservations,
+  clearCachedAvailability,
   initializeDatabase,
 } from "@/storage/database";
 import { clearSession, loadSession, saveSession } from "@/storage/session";
@@ -40,9 +41,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     queryClient.clear();
     await clearSession();
-    try { await clearReminders(); } catch { /* Session cleanup should still finish. */ }
-    await clearSavedRooms();
+    try { await clearReminders(); } catch { logRuntime("warn", "reminder_cleanup_failed"); }
     if (userId) await clearCachedReservations(userId);
+    if (userId) await clearCachedAvailability(userId);
   }, [queryClient, user?.id]);
 
   useEffect(() => {

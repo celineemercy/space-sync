@@ -27,9 +27,9 @@ export function useRoom(roomId: string) {
 }
 
 export function useAvailabilitySearch() {
-  const { accessToken } = useAuth();
+  const { accessToken, user } = useAuth();
   return useMutation({
     mutationFn: (input: AvailabilityInput) =>
-      searchAvailableRooms(input, accessToken),
+      searchAvailableRooms(input, user!.id, accessToken),
   });
 }

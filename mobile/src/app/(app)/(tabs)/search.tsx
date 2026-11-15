@@ -99,7 +99,7 @@ export default function SearchScreen() {
 
   const openRoom = (room: Room) => {
     const params: Record<string, string> = { id: room.id };
-    if (searchedInput && availability.data) {
+    if (searchedInput && availability.data && !availability.data.stale) {
       params.startsAt = searchedInput.startsAt;
       params.endsAt = searchedInput.endsAt;
     }
@@ -134,6 +134,9 @@ export default function SearchScreen() {
       <Screen contentContainerStyle={styles.content}>
         {roomsQuery.data?.stale ? (
           <OfflineBanner updatedAt={roomsQuery.data.updatedAt} />
+        ) : null}
+        {searchResult?.stale ? (
+          <><OfflineBanner updatedAt={searchResult.updatedAt} /><Text style={styles.offlineNotice}>Availability may have changed. Reconnect and search again before booking.</Text></>
         ) : null}
 
         <View style={styles.panel}>
@@ -319,6 +322,7 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
+  offlineNotice: { ...Typography.body, color: Colors.warning },
   page: { flex: 1, backgroundColor: Colors.background },
   content: { paddingTop: Spacing.md },
   panel: {
