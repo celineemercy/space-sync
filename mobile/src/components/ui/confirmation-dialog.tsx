@@ -2,6 +2,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { Colors, Radius, Spacing, Typography } from "@/constants/theme";
 import { AppButton } from "@/components/ui/app-button";
+import { StatusMessage } from "@/components/ui/status-message";
 
 type Props = {
   visible: boolean;
@@ -11,6 +12,7 @@ type Props = {
   cancelLabel?: string;
   tone?: "default" | "danger";
   loading?: boolean;
+  error?: Error | null;
   onConfirm: () => void;
   onClose: () => void;
 };
@@ -23,6 +25,7 @@ export function ConfirmationDialog({
   cancelLabel = "Not now",
   tone = "default",
   loading = false,
+  error,
   onConfirm,
   onClose,
 }: Props) {
@@ -60,6 +63,7 @@ export function ConfirmationDialog({
             <Text style={styles.title}>{title}</Text>
             <Text style={styles.description}>{description}</Text>
           </View>
+          {error ? <StatusMessage error={error} /> : null}
           <View style={styles.actions}>
             <AppButton
               disabled={loading}

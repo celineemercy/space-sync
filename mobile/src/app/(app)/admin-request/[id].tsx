@@ -57,7 +57,7 @@ export default function AdminRequestScreen() {
       <AppButton label="Approve request" onPress={() => setDecision("approve")} />
       <AppButton label="Reject request" variant="danger" disabled={!reason.trim()} onPress={() => setDecision("reject")} />
     </View> : null}
-    <ConfirmationDialog visible={decision !== null} title={decision === "approve" ? "Approve this request?" : "Reject this request?"} description={`${item.room.name} · ${toCampusLabel(item.startsAt)} – ${toCampusLabel(item.endsAt)}. ${decision === "approve" ? `Confirm for ${item.student.email}?` : `Reason: ${reason.trim()}`}`} confirmLabel={decision === "approve" ? "Approve" : "Reject"} cancelLabel="Go back" tone={decision === "reject" ? "danger" : undefined} loading={mutation.isPending} onClose={() => setDecision(null)} onConfirm={() => { if (decision) mutation.mutate(decision); }} />
+    <ConfirmationDialog visible={decision !== null} title={decision === "approve" ? "Approve this request?" : "Reject this request?"} description={`${item.room.name} · ${toCampusLabel(item.startsAt)} – ${toCampusLabel(item.endsAt)}. ${decision === "approve" ? `Confirm for ${item.student.email}?` : `Reason: ${reason.trim()}`}`} confirmLabel={decision === "approve" ? "Approve" : "Reject"} cancelLabel="Go back" tone={decision === "reject" ? "danger" : undefined} loading={mutation.isPending} error={mutation.error} onClose={() => setDecision(null)} onConfirm={() => { if (decision) mutation.mutate(decision); }} />
   </Screen>;
 }
 

@@ -5,7 +5,7 @@ import {
   searchAvailableRooms,
   type RoomListResult,
 } from "@/features/rooms/use-cases";
-import type { AvailabilityInput, Room } from "@/types/domain";
+import type { AvailabilityInput } from "@/types/domain";
 import { useAuth } from "@/providers/auth-provider";
 
 export function useRooms() {
@@ -19,7 +19,7 @@ export function useRooms() {
 
 export function useRoom(roomId: string) {
   const { accessToken } = useAuth();
-  return useQuery<Room>({
+  return useQuery<Awaited<ReturnType<typeof loadRoom>>>({
     queryKey: ["room", roomId],
     enabled: Boolean(accessToken && roomId),
     queryFn: () => loadRoom(roomId, accessToken),

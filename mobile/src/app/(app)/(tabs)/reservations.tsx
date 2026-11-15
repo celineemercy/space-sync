@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Alert, Platform, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, AppState, Platform, StyleSheet, Text, View } from "react-native";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppButton } from "@/components/ui/app-button";
 import { ErrorState, LoadingState } from "@/components/ui/async-state";
@@ -30,7 +30,14 @@ export default function ReservationsScreen() {
   const cancellation = useCancelReservation();
   const [reservationToCancel, setReservationToCancel] =
     useState<Reservation | null>(null);
-  const [now] = useState(() => Date.now());
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 60_000);
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") setNow(Date.now());
+    });
+    return () => { clearInterval(timer); subscription.remove(); };
+  }, []);
   const reservations = reservationsQuery.data?.reservations ?? [];
   const pending = reservations.filter((item) => item.status === "PENDING").sort((a, b) => a.startsAt.localeCompare(b.startsAt));
   const confirmed = reservations.filter((item) => item.status === "CONFIRMED" && new Date(item.endsAt).getTime() > now).sort((a, b) => a.startsAt.localeCompare(b.startsAt));
@@ -134,6 +141,7 @@ export default function ReservationsScreen() {
         cancelLabel="Keep reservation"
         tone="danger"
         loading={cancellation.isPending}
+        error={cancellation.error}
         onClose={() => setReservationToCancel(null)}
         onConfirm={cancelReservation}
       />
@@ -168,6 +176,7 @@ function ReservationSection({
               <Text style={styles.title}>{reservation.room.name}</Text>
             </View>
             <Text
+              accessibilityLabel={`${reservation.room.name}, ${toCampusLabel(reservation.startsAt)}, ${statusLabel(reservation, now)}`}
               style={[
                 styles.status,
                 ["CANCELLED", "EXPIRED"].includes(reservation.status) && styles.cancelled,

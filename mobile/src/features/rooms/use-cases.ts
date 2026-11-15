@@ -33,11 +33,11 @@ export async function loadRoom(
   repository: RoomsRepository = roomsRepository,
 ) {
   try {
-    return await repository.fetchById(roomId, accessToken);
+    return { room: await repository.fetchById(roomId, accessToken), stale: false, updatedAt: null as string | null };
   } catch (error) {
     const cached = await repository.readCache();
     const room = cached.rooms.find((item) => item.id === roomId);
-    if (room) return room;
+    if (room) return { room, stale: true, updatedAt: cached.updatedAt };
     throw error;
   }
 }

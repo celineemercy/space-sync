@@ -6,7 +6,7 @@ import { AppButton } from "@/components/ui/app-button";
 import { ErrorState, LoadingState } from "@/components/ui/async-state";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Screen } from "@/components/ui/screen";
-import { StatusMessage } from "@/components/ui/status-message";
+import { OfflineBanner, StatusMessage } from "@/components/ui/status-message";
 import { Colors, Radius, Spacing, Typography } from "@/constants/theme";
 import { useCreateReservation } from "@/features/reservations/queries";
 import { useRoom } from "@/features/rooms/queries";
@@ -85,7 +85,7 @@ export default function RoomDetailScreen() {
     );
   }
 
-  const room = roomQuery.data;
+  const room = roomQuery.data.room;
   const isSaved = savedRooms.data?.some((item) => item.roomId === room.id);
 
   const saveLocally = async () => {
@@ -103,6 +103,7 @@ export default function RoomDetailScreen() {
   return (
     <View style={styles.page}>
       <Screen>
+        {roomQuery.data.stale ? <OfflineBanner updatedAt={roomQuery.data.updatedAt} /> : null}
         <View style={styles.hero}>
           <Text style={styles.code}>{room.code}</Text>
           <Text style={styles.title}>{room.name}</Text>
@@ -154,7 +155,7 @@ export default function RoomDetailScreen() {
             {room.description ?? "No description is available."}
           </Text>
           <Text style={styles.label}>Facilities</Text>
-          <View style={styles.chips}>
+          <View style={styles.chips} accessible accessibilityLabel={`Facilities: ${room.facilities.map((facility) => facility.name).join(", ") || "none"}`}>
             {room.facilities.map((facility) => (
               <Text key={facility.id} style={styles.chip}>
                 {facility.name}
@@ -191,6 +192,7 @@ export default function RoomDetailScreen() {
         }
         cancelLabel={dialog === "success" ? "Stay here" : "Review details"}
         loading={reservation.isPending}
+        error={dialog === "success" ? null : reservation.error}
         onClose={() => setDialog(null)}
         onConfirm={
           dialog === "success"
