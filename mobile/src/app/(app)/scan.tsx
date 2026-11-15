@@ -53,7 +53,7 @@ export default function ScanRoomScreen() {
         </View>
       ) : (
         <View style={styles.panel}>
-          <View style={styles.cameraFrame}>
+          <View style={styles.cameraFrame} accessible accessibilityLabel="Camera viewfinder. Point at a room QR code.">
             <CameraView
               style={styles.camera}
               facing="back"
