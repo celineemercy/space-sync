@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ReservationStatus } from '../generated/prisma/client.js';
 import { parseTimeRange } from '../common/time-range.js';
+import { activeReservationOverlap } from '../common/active-reservation-overlap.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { roomWithFacilities, toRoomDto } from '../rooms/room.mapper.js';
 import type { AvailabilityQueryDto } from './dto/availability-query.dto.js';
@@ -26,14 +26,7 @@ export class AvailabilityService {
           none: { startsAt: { lt: endsAt }, endsAt: { gt: startsAt } },
         },
         reservations: {
-          none: {
-            OR: [
-              { status: ReservationStatus.CONFIRMED },
-              { status: ReservationStatus.PENDING, startsAt: { gt: new Date() } },
-            ],
-            startsAt: { lt: endsAt },
-            endsAt: { gt: startsAt },
-          },
+          none: activeReservationOverlap(startsAt, endsAt),
         },
       },
       include: roomWithFacilities,

@@ -83,7 +83,7 @@ describe('approval access and decisions', () => {
     expect(remove).toHaveBeenCalledWith('key');
   });
 
-  it('expires pending requests at their start time', async () => {
+  it('expires pending requests at their end time', async () => {
     const start = new Date('2030-01-01T09:00:00.000Z');
     vi.useFakeTimers();
     vi.setSystemTime(start);
@@ -93,7 +93,7 @@ describe('approval access and decisions', () => {
       const service = new ReservationsService({ reservation: { updateMany, findMany } } as unknown as PrismaService, {} as DocumentsService);
       await service.mine(student);
       expect(updateMany).toHaveBeenCalledWith({
-        where: { status: 'PENDING', startsAt: { lte: start } },
+        where: { status: 'PENDING', endsAt: { lte: start } },
         data: { status: 'EXPIRED', decidedAt: start },
       });
     } finally {

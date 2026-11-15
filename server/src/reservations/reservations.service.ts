@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ApiException } from '../common/api-exception.js';
 import { parseTimeRange } from '../common/time-range.js';
+import { activeReservationOverlap } from '../common/active-reservation-overlap.js';
 import { ReservationStatus } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { CreateReservationDto } from './dto/create-reservation.dto.js';
@@ -39,7 +40,7 @@ export class ReservationsService implements OnModuleInit, OnModuleDestroy {
 
   private async expirePending() {
     await this.prisma.reservation.updateMany({
-      where: { status: ReservationStatus.PENDING, startsAt: { lte: new Date() } },
+      where: { status: ReservationStatus.PENDING, endsAt: { lte: new Date() } },
       data: { status: ReservationStatus.EXPIRED, decidedAt: new Date() },
     });
   }
@@ -82,12 +83,7 @@ export class ReservationsService implements OnModuleInit, OnModuleDestroy {
           },
         }),
         transaction.reservation.count({
-          where: {
-            roomId: input.roomId,
-            OR: [{ status: ReservationStatus.CONFIRMED }, { status: ReservationStatus.PENDING, startsAt: { gt: new Date() } }],
-            startsAt: { lt: endsAt },
-            endsAt: { gt: startsAt },
-          },
+          where: { roomId: input.roomId, ...activeReservationOverlap(startsAt, endsAt) },
         }),
       ]);
 
@@ -208,7 +204,7 @@ export class ReservationsService implements OnModuleInit, OnModuleDestroy {
       await transaction.$queryRaw`SELECT "id" FROM "Room" WHERE "id" = ${request.roomId} FOR UPDATE`;
       const now = new Date();
       const result = await transaction.reservation.updateMany({
-        where: { id, status: ReservationStatus.PENDING, startsAt: { gt: now } },
+        where: { id, status: ReservationStatus.PENDING, endsAt: { gt: now } },
         data: { status: status === 'CONFIRMED' ? ReservationStatus.CONFIRMED : ReservationStatus.REJECTED, decidedAt: now, decidedById: user.userId, rejectionReason: status === 'REJECTED' ? trimmed : null },
       });
       if (result.count !== 1) throw new ApiException(409, 'REQUEST_ALREADY_DECIDED', 'This request is no longer pending.');
