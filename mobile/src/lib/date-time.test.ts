@@ -1,6 +1,10 @@
-import { combineDateAndTime, isFutureStart, isValidRange } from "./date-time";
+import { combineDateAndTime, isFutureStart, isValidRange, toCampusInstant } from "./date-time";
 
 describe("date and time helpers", () => {
+  it("interprets picker wall time as Jakarta time", () => {
+    const picked = new Date(2026, 8, 21, 9, 0);
+    expect(toCampusInstant(picked).toISOString()).toBe("2026-09-21T02:00:00.000Z");
+  });
   it("combines the selected date with the selected local time", () => {
     const date = new Date(2026, 8, 21, 0, 0);
     const time = new Date(2026, 0, 1, 13, 45);

@@ -15,6 +15,14 @@ export function combineDateAndTime(date: Date, time: Date): Date {
   return result;
 }
 
+/** Interpret a picker's device-local date and time as Jakarta wall time. */
+export function toCampusInstant(localWallTime: Date): Date {
+  return new Date(Date.UTC(
+    localWallTime.getFullYear(), localWallTime.getMonth(), localWallTime.getDate(),
+    localWallTime.getHours() - 7, localWallTime.getMinutes(), 0, 0,
+  ));
+}
+
 export function defaultSearchRange() {
   const startsAt = new Date();
   startsAt.setDate(startsAt.getDate() + 1);

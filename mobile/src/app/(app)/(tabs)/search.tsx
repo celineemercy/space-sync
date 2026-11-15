@@ -14,6 +14,7 @@ import { Colors, Radius, Spacing, Typography } from "@/constants/theme";
 import { useAvailabilitySearch, useRooms } from "@/features/rooms/queries";
 import {
   combineDateAndTime,
+  toCampusInstant,
   defaultSearchRange,
   isFutureStart,
   isValidRange,
@@ -67,8 +68,8 @@ export default function SearchScreen() {
   };
 
   const search = () => {
-    const start = combineDateAndTime(date, startsAt);
-    const end = combineDateAndTime(date, endsAt);
+    const start = toCampusInstant(combineDateAndTime(date, startsAt));
+    const end = toCampusInstant(combineDateAndTime(date, endsAt));
     if (!isValidRange(start, end)) {
       setValidationError("End time must be later than start time.");
       return;
