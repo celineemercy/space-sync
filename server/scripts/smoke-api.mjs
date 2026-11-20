@@ -68,6 +68,27 @@ try {
   assert(conflicting.length === 1, 'Concurrent reservation check did not reject exactly one booking.');
   assert(successful[0].body?.status === 'PENDING', 'The new request is not awaiting approval.');
 
+  const held = await request(`/rooms/availability?${query}`, { headers });
+  assert(held.status === 200 && !held.body.rooms.some((room) => room.id === roomId), 'Pending reservation did not block availability.');
+  const adjacentQuery = new URLSearchParams({ startsAt: endsAt.toISOString(), endsAt: new Date(endsAt.getTime() + 60_000).toISOString() });
+  const adjacent = await request(`/rooms/availability?${adjacentQuery}`, { headers });
+  assert(adjacent.status === 200 && adjacent.body.rooms.some((room) => room.id === roomId), 'Adjacent non-overlapping interval was incorrectly blocked.');
+
+  // Only alter this smoke test's own reservation, using the CI/test database.
+  if (process.env.DATABASE_URL && new URL(process.env.DATABASE_URL).pathname.endsWith('_test')) {
+    const { Client } = await import('pg');
+    const database = new Client({ connectionString: process.env.DATABASE_URL });
+    await database.connect();
+    try {
+      const now = new Date();
+      const ongoingEnd = new Date(now.getTime() + 60_000);
+      await database.query('UPDATE "Reservation" SET "startsAt" = $1, "endsAt" = $2 WHERE "id" = $3', [now, ongoingEnd, successful[0].body.id]);
+      const ongoingQuery = new URLSearchParams({ startsAt: now.toISOString(), endsAt: ongoingEnd.toISOString() });
+      const ongoing = await request(`/rooms/availability?${ongoingQuery}`, { headers });
+      assert(ongoing.status === 200 && !ongoing.body.rooms.some((room) => room.id === roomId), 'Started pending reservation did not block availability.');
+    } finally { await database.end(); }
+  }
+
   const mine = await request('/reservations/mine', { headers });
   assert(
     mine.status === 200 && mine.body.some((item) => item.id === successful[0].body.id),
