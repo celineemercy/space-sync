@@ -1,5 +1,5 @@
 import * as Notifications from "expo-notifications";
-import { cancelReminder, isReminderScheduled, reminderDate, reminderId, scheduleReminder } from "@/features/reminders/reminders";
+import { cancelReminder, clearReminders, isReminderScheduled, reminderDate, reminderId, scheduleReminder } from "@/features/reminders/reminders";
 import type { Reservation } from "@/types/domain";
 
 jest.mock("expo-notifications", () => ({
@@ -22,6 +22,16 @@ const reservation: Reservation = {
 };
 
 beforeEach(() => jest.clearAllMocks());
+
+it("cancels every reservation reminder without touching unrelated notifications", async () => {
+  jest.mocked(Notifications.getAllScheduledNotificationsAsync).mockResolvedValueOnce([
+    { identifier: reminderId("a") }, { identifier: reminderId("b") }, { identifier: "other" },
+  ] as never);
+  await clearReminders();
+  expect(Notifications.cancelScheduledNotificationAsync).toHaveBeenCalledWith(reminderId("a"));
+  expect(Notifications.cancelScheduledNotificationAsync).toHaveBeenCalledWith(reminderId("b"));
+  expect(Notifications.cancelScheduledNotificationAsync).not.toHaveBeenCalledWith("other");
+});
 
 it("calculates a reminder 30 minutes before a future reservation", () => {
   expect(reminderDate(reservation.startsAt, Date.parse("2030-01-01T00:00:00Z"))?.toISOString())

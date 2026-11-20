@@ -40,10 +40,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAccessToken(null);
     setUser(null);
     queryClient.clear();
-    await clearSession();
-    try { await clearReminders(); } catch { logRuntime("warn", "reminder_cleanup_failed"); }
-    if (userId) await clearCachedReservations(userId);
-    if (userId) await clearCachedAvailability(userId);
+    const cleanup = [
+      { name: "session", run: () => clearSession() },
+      { name: "reminders", run: () => clearReminders() },
+      ...(userId ? [
+        { name: "reservations", run: () => clearCachedReservations(userId) },
+        { name: "availability", run: () => clearCachedAvailability(userId) },
+      ] : []),
+    ];
+    await Promise.all(cleanup.map(async ({ name, run }) => {
+      try { await run(); }
+      catch { logRuntime("warn", "signout_cleanup_failed", { resource: name }); }
+    }));
   }, [queryClient, user?.id]);
 
   useEffect(() => {
