@@ -190,7 +190,7 @@ function ReservationSection({
           </View>
           {onCancel ? <Text importantForAccessibility="no" style={styles.location}>{reservation.room.location}</Text> : null}
           <Text importantForAccessibility="no" style={styles.time}>{toCampusLabel(reservation.startsAt)}</Text>
-          {reservation.rejectionReason ? <Text accessibilityLabel={`Rejection reason: ${reservation.rejectionReason}`} style={styles.reason}>Reason: {reservation.rejectionReason}</Text> : null}
+          {reservation.status === "REJECTED" ? <Text accessibilityLabel={`Rejection reason: ${reservation.rejectionReason?.trim() || "No reason provided"}`} style={styles.reason}>Reason: {reservation.rejectionReason?.trim() || "No reason provided"}</Text> : null}
           {onCancel ? <Text importantForAccessibility="no" style={styles.time}>
             Until {toCampusLabel(reservation.endsAt)}
           </Text> : null}
