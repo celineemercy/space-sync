@@ -82,7 +82,7 @@ try {
     try {
       const now = new Date();
       const ongoingEnd = new Date(now.getTime() + 60_000);
-      await database.query('UPDATE "Reservation" SET "startsAt" = $1, "endsAt" = $2 WHERE "id" = $3', [now, ongoingEnd, successful[0].body.id]);
+      await database.query('UPDATE "Reservation" SET "startsAt" = $1, "endsAt" = $2 WHERE "id" = $3', [now.toISOString(), ongoingEnd.toISOString(), successful[0].body.id]);
       const ongoingQuery = new URLSearchParams({ startsAt: now.toISOString(), endsAt: ongoingEnd.toISOString() });
       const ongoing = await request(`/rooms/availability?${ongoingQuery}`, { headers });
       assert(ongoing.status === 200 && !ongoing.body.rooms.some((room) => room.id === roomId), 'Started pending reservation did not block availability.');
