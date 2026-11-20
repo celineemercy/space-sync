@@ -17,4 +17,9 @@ export class RoomsController {
   detail(@Param('roomId') roomId: string) {
     return this.rooms.detail(roomId);
   }
+
+  @Get(':roomId/schedule')
+  schedule(@Param('roomId') roomId: string, @Query('date') date?: string) {
+    return this.rooms.schedule(roomId, date);
+  }
 }

@@ -1,7 +1,20 @@
 import * as SQLite from "expo-sqlite";
-import type { AvailabilityResponse, Facility, Reservation, Room } from "@/types/domain";
+import type { AvailabilityResponse, Facility, Reservation, Room, RoomSchedule, CachedRoomSchedule } from "@/types/domain";
 
 const databasePromise = SQLite.openDatabaseAsync("space-sync.db");
+
+export async function cacheRoomSchedule(roomId: string, date: string, schedule: RoomSchedule, updatedAt = new Date().toISOString()) {
+  const database = await databasePromise;
+  await database.runAsync("INSERT OR REPLACE INTO cache_metadata (key, value) VALUES (?, ?)", `room-schedule:${roomId}:${date}`, JSON.stringify({ schedule, updatedAt }));
+}
+export async function getCachedRoomSchedule(roomId: string, date: string): Promise<CachedRoomSchedule | null> {
+  const database = await databasePromise;
+  const row = await database.getFirstAsync<{ value: string }>("SELECT value FROM cache_metadata WHERE key = ?", `room-schedule:${roomId}:${date}`);
+  try {
+    const cached = row ? JSON.parse(row.value) as CachedRoomSchedule : null;
+    return cached && cached.schedule?.date === date && Array.isArray(cached.schedule.items) && typeof cached.updatedAt === "string" ? cached : null;
+  } catch { return null; }
+}
 
 export async function initializeDatabase() {
   const database = await databasePromise;

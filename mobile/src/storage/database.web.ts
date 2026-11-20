@@ -1,4 +1,15 @@
-import type { AvailabilityResponse, Reservation, Room } from "@/types/domain";
+import type { AvailabilityResponse, Reservation, Room, RoomSchedule, CachedRoomSchedule } from "@/types/domain";
+
+export async function cacheRoomSchedule(roomId: string, date: string, schedule: RoomSchedule, updatedAt = new Date().toISOString()) {
+  storage()?.setItem(`space-sync.room-schedule:${roomId}:${date}`, JSON.stringify({ schedule, updatedAt }));
+}
+export async function getCachedRoomSchedule(roomId: string, date: string): Promise<CachedRoomSchedule | null> {
+  try {
+    const raw = storage()?.getItem(`space-sync.room-schedule:${roomId}:${date}`);
+    const cached = raw ? JSON.parse(raw) as CachedRoomSchedule : null;
+    return cached && cached.schedule?.date === date && Array.isArray(cached.schedule.items) && typeof cached.updatedAt === "string" ? cached : null;
+  } catch { return null; }
+}
 
 const ROOMS_KEY = "space-sync.cached-rooms";
 const ROOMS_UPDATED_AT_KEY = "space-sync.cached-rooms-updated-at";

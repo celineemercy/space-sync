@@ -54,3 +54,6 @@ export type AvailabilityInput = {
   minCapacity?: number;
   facilityIds?: string[];
 };
+
+export type RoomSchedule = { date: string; timeZone: string; items: { id: string; kind: 'class' | 'reservation'; startsAt: string; endsAt: string }[] };
+export type CachedRoomSchedule = { schedule: RoomSchedule; updatedAt: string };
