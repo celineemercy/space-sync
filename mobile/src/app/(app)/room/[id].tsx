@@ -9,6 +9,7 @@ import { Screen } from "@/components/ui/screen";
 import { OfflineBanner, StatusMessage } from "@/components/ui/status-message";
 import { Colors, Radius, Spacing, Typography } from "@/constants/theme";
 import { useCreateReservation } from "@/features/reservations/queries";
+import { reservationDocumentMime } from "@/features/reservations/document";
 import { useRoom } from "@/features/rooms/queries";
 import {
   useSavedRooms,
@@ -44,12 +45,15 @@ export default function RoomDetailScreen() {
       const result = await DocumentPicker.getDocumentAsync({ type: ["application/pdf", "image/jpeg", "image/png"], multiple: false, copyToCacheDirectory: true });
       if (result.canceled) return;
       const selected = result.assets[0];
-      if (!selected || (selected.size ?? 0) > 10 * 1024 * 1024) {
-        setDocumentError("Choose one PDF, JPG, or PNG up to 10 MB.");
-        return;
+      try {
+        if (!selected) throw new Error("Choose one PDF, JPG, or PNG up to 10 MB.");
+        const mimeType = reservationDocumentMime(selected);
+        setDocument({ ...selected, mimeType });
+        setDocumentError(null);
+      } catch (error) {
+        setDocument(null);
+        setDocumentError(error instanceof Error ? error.message : "Choose a PDF, JPG, or PNG.");
       }
-      setDocument(selected);
-      setDocumentError(null);
     } catch {
       logRuntime("warn", "document_picker_failed");
       setDocumentError("Unable to open your files. Try again.");
@@ -58,6 +62,8 @@ export default function RoomDetailScreen() {
 
   const reserve = async () => {
     if (!startsAt || !endsAt || !document) return;
+    try { reservationDocumentMime(document); }
+    catch (error) { setDocumentError((error as Error).message); setDialog(null); return; }
     try {
       await reservation.mutateAsync({ roomId, startsAt, endsAt, document: { uri: document.uri, name: document.name, mimeType: document.mimeType ?? "application/octet-stream", size: document.size, file: document.file } });
       setDialog("success");
