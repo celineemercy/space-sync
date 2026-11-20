@@ -78,6 +78,20 @@ beforeEach(() => {
 });
 
 describe("ReservationsScreen primary states", () => {
+  it.each([null, undefined, "", "   "])("shows a fallback for a rejected reservation with reason %p", async (rejectionReason) => {
+    mockReservationsQuery.data = { reservations: [{ ...confirmedReservation, status: "REJECTED", rejectionReason }], stale: true, updatedAt: "2026-11-20T00:00:00Z" };
+    const screen = await render(<ReservationsScreen />);
+    expect(screen.getByText("Reason: No reason provided")).toBeTruthy();
+  });
+
+  it("shows a rejected reason but never exposes it on other statuses", async () => {
+    mockReservationsQuery.data = { reservations: [{ ...confirmedReservation, status: "REJECTED", rejectionReason: "Missing signature" }], stale: false, updatedAt: null };
+    const screen = await render(<ReservationsScreen />);
+    expect(screen.getByLabelText("Rejection reason: Missing signature")).toBeTruthy();
+    mockReservationsQuery.data.reservations[0].status = "CONFIRMED";
+    await screen.rerender(<ReservationsScreen />);
+    expect(screen.queryByText("Reason: Missing signature")).toBeNull();
+  });
   it("renders the initial loading state", async () => {
     mockReservationsQuery.data = undefined;
     mockReservationsQuery.isLoading = true;
