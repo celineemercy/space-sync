@@ -13,6 +13,8 @@ it.each([
   { name: "app.apk", mimeType: "application/vnd.android.package-archive" },
   { name: "file.zip", mimeType: "application/zip" },
   { name: "script.sh", mimeType: "text/plain" },
+  { name: "file.constructor", mimeType: "application/octet-stream" },
+  { name: "file.__proto__" },
   { name: "fake.pdf.exe", mimeType: "application/pdf" },
   { name: "fake.png", mimeType: "application/pdf" },
   { name: "file.pdf", mimeType: "application/pdf", size: 10 * 1024 * 1024 + 1 },
