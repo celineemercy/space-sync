@@ -197,10 +197,24 @@ describe("SearchScreen primary states", () => {
 
     mockAvailability.error = new Error("Availability could not be loaded.");
     await screen.rerender(<SearchScreen />);
-    expect(screen.getByText("Availability could not be loaded.")).toBeTruthy();
+    expect(screen.getByText("Could not search availability. Check your connection and try again.")).toBeTruthy();
+    expect(screen.getAllByTestId("error-state")).toHaveLength(1);
     expect(screen.queryByText("Campus Room")).toBeNull();
     await fireEvent.press(screen.getByLabelText("Try again"));
     expect(mockAvailability.mutate).toHaveBeenLastCalledWith(searchedInput);
+  });
+
+  it("keeps the availability error actionable when the room list also fails", async () => {
+    mockRoomsQuery.data = undefined;
+    mockRoomsQuery.error = new Error("Rooms unavailable");
+    const screen = await render(<SearchScreen />);
+    await fireEvent.press(screen.getByLabelText("Search availability"));
+    mockAvailability.error = new Error("offline");
+    await screen.rerender(<SearchScreen />);
+    expect(screen.getByText("Could not search availability. Check your connection and try again.")).toBeTruthy();
+    await fireEvent.press(screen.getByLabelText("Try again"));
+    expect(mockAvailability.mutate).toHaveBeenCalledTimes(2);
+    expect(mockRefetchRooms).not.toHaveBeenCalled();
   });
 });
 
