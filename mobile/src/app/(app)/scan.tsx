@@ -7,7 +7,7 @@ import { ErrorState, LoadingState } from "@/components/ui/async-state";
 import { Screen } from "@/components/ui/screen";
 import { Colors, Radius, Spacing, Typography } from "@/constants/theme";
 import { useRooms } from "@/features/rooms/queries";
-import { findScannedRoom } from "@/features/rooms/scan-code";
+import { resolveScannedRoom } from "@/features/rooms/scan-code";
 
 export default function ScanRoomScreen() {
   const router = useRouter();
@@ -16,16 +16,28 @@ export default function ScanRoomScreen() {
   const [scanError, setScanError] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const scanLocked = useRef(false);
+  const [resolving, setResolving] = useState(false);
 
-  const onScan = (data: string) => {
+  const onScan = async (data: string) => {
     if (scanLocked.current) return;
     scanLocked.current = true;
-    const room = findScannedRoom(data, rooms.data?.rooms ?? []);
+    setResolving(true);
+    try {
+    const room = await resolveScannedRoom(data, rooms.data?.rooms ?? [], async () => {
+      const result = await rooms.refetch();
+      if (result.error || !result.data || result.data.stale) throw new Error("Room refresh failed");
+      return result.data.rooms;
+    });
     if (room) {
       router.replace({ pathname: "/(app)/room/[id]", params: { id: room.id } });
       return;
     }
     setScanError("This QR code does not match a space-sync room. Try another code.");
+    } catch {
+      setScanError("Could not refresh rooms. Check your connection and scan again.");
+    } finally {
+      setResolving(false);
+    }
   };
 
   const retry = () => {
@@ -58,7 +70,7 @@ export default function ScanRoomScreen() {
               style={styles.camera}
               facing="back"
               barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
-              onBarcodeScanned={scanError ? undefined : ({ data }) => onScan(data)}
+              onBarcodeScanned={scanError || resolving ? undefined : ({ data }) => void onScan(data)}
               onMountError={({ message }) => setCameraError(message)}
             />
           </View>
@@ -68,7 +80,7 @@ export default function ScanRoomScreen() {
               <AppButton label="Scan another code" onPress={retry} />
             </View>
           ) : (
-            <Text style={styles.help}>Point the camera at a room QR code.</Text>
+            <Text style={styles.help}>{resolving ? "Checking room code..." : "Point the camera at a room QR code."}</Text>
           )}
         </View>
       )}
