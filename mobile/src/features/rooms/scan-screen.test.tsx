@@ -31,3 +31,14 @@ it("shows a refresh error for stale fallback data and allows another scan", asyn
   await fireEvent.press(screen.getByText("Scan another code"));
   expect(screen.queryByText(/Could not refresh rooms/)).toBeNull();
 });
+
+it.each(["cancel", "unmount"])("does not navigate when the scanner is left via %s during a lookup", async (action) => {
+  let finish!: (value: unknown) => void;
+  mockRefetch.mockReturnValue(new Promise((resolve) => { finish = resolve; }));
+  const screen = await render(<ScanRoomScreen />);
+  await fireEvent(screen.getByTestId("camera"), "barcodeScanned", { data: "NEW-1" });
+  if (action === "cancel") await fireEvent.press(screen.getByLabelText("Cancel scanning"));
+  else await screen.unmount();
+  await act(async () => finish({ data: { rooms: [{ id: "new", code: "NEW-1" }], stale: false } }));
+  expect(mockReplace).not.toHaveBeenCalled();
+});

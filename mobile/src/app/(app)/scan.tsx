@@ -1,6 +1,6 @@
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Linking, StyleSheet, Text, View } from "react-native";
 import { AppButton } from "@/components/ui/app-button";
 import { ErrorState, LoadingState } from "@/components/ui/async-state";
@@ -16,10 +16,12 @@ export default function ScanRoomScreen() {
   const [scanError, setScanError] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const scanLocked = useRef(false);
+  const active = useRef(true);
+  useEffect(() => { active.current = true; return () => { active.current = false; }; }, []);
   const [resolving, setResolving] = useState(false);
 
   const onScan = async (data: string) => {
-    if (scanLocked.current) return;
+    if (scanLocked.current || !active.current) return;
     scanLocked.current = true;
     setResolving(true);
     try {
@@ -28,15 +30,16 @@ export default function ScanRoomScreen() {
       if (result.error || !result.data || result.data.stale) throw new Error("Room refresh failed");
       return result.data.rooms;
     });
+    if (!active.current) return;
     if (room) {
       router.replace({ pathname: "/(app)/room/[id]", params: { id: room.id } });
       return;
     }
     setScanError("This QR code does not match a space-sync room. Try another code.");
     } catch {
-      setScanError("Could not refresh rooms. Check your connection and scan again.");
+      if (active.current) setScanError("Could not refresh rooms. Check your connection and scan again.");
     } finally {
-      setResolving(false);
+      if (active.current) setResolving(false);
     }
   };
 
@@ -84,7 +87,7 @@ export default function ScanRoomScreen() {
           )}
         </View>
       )}
-      <AppButton label="Cancel scanning" variant="secondary" onPress={() => router.back()} />
+      <AppButton label="Cancel scanning" variant="secondary" onPress={() => { active.current = false; router.back(); }} />
     </Screen>
   );
 }
