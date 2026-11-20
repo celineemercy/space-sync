@@ -27,6 +27,14 @@ it('moves a device token between users under a transaction and binds it to JWT e
   await expect(service.register({ ...auth, expiresAt: 1 }, token)).rejects.toMatchObject({ response: { code: 'UNAUTHORIZED' } });
 });
 
+it('does not expose push tokens through database errors', async () => {
+  const { service, prisma, user } = fixture();
+  prisma.$transaction.mockRejectedValueOnce(new Error(`Database failed for ${token}`));
+  await expect(service.register(auth, token)).rejects.toMatchObject({ response: { code: 'PUSH_REGISTRATION_FAILED', message: 'Unable to register notifications. Try again.' } });
+  user.updateMany.mockRejectedValueOnce(new Error(`Database failed for ${token}`));
+  await expect(service.remove(auth, token)).rejects.toMatchObject({ response: { code: 'PUSH_REGISTRATION_FAILED', message: 'Unable to update notifications. Try again.' } });
+});
+
 it.each(['CONFIRMED', 'REJECTED'])('sends room, time and decision status for %s and checks delivery receipts', async (status) => {
   const { service, user } = fixture(status);
   vi.mocked(fetch).mockResolvedValueOnce({ ok: true, json: async () => ({ data: { status: 'ok', id: 'ticket' } }) } as Response).mockResolvedValueOnce({ ok: true, json: async () => ({ data: { ticket: { status: 'error', details: { error: 'DeviceNotRegistered' } } } }) } as Response);
@@ -65,6 +73,25 @@ it('stops retries if logout or account switching invalidates the registration', 
   const sending = service.decision('reservation');
   await vi.advanceTimersByTimeAsync(1100); await sending;
   expect(fetch).toHaveBeenCalledTimes(1);
+});
+
+it.each([[503, 3], [400, 1]])('bounds delivery retries for HTTP %i to %i attempts', async (status, attempts) => {
+  const { service } = fixture();
+  vi.mocked(fetch).mockResolvedValue({ ok: false, status } as Response);
+  const sending = service.decision('reservation');
+  await vi.advanceTimersByTimeAsync(3100); await sending;
+  expect(fetch).toHaveBeenCalledTimes(attempts);
+  service.onModuleDestroy();
+  expect(vi.getTimerCount()).toBe(0);
+});
+
+it('checks a missing receipt at most twice and clears its timers', async () => {
+  const { service } = fixture();
+  vi.mocked(fetch).mockResolvedValueOnce({ ok: true, json: async () => ({ data: { status: 'ok', id: 'ticket' } }) } as Response).mockResolvedValue({ ok: true, json: async () => ({ data: {} }) } as Response);
+  await service.decision('reservation');
+  await vi.advanceTimersByTimeAsync(20 * 60_000);
+  expect(fetch).toHaveBeenCalledTimes(3);
+  expect(vi.getTimerCount()).toBe(0);
 });
 
 it('returns the committed decision despite push failure and never notifies a rolled-back decision', async () => {

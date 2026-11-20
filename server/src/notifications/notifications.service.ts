@@ -20,17 +20,22 @@ export class NotificationsService implements OnModuleDestroy {
 
   async register(user: AuthUser, token: string) {
     const expiresAt = this.expiration(user);
+    try {
     await this.prisma.$transaction(async (tx) => {
       // Serialize claims for the same device token across accounts.
       await tx.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${token}, 0))`;
       await tx.user.updateMany({ where: { pushToken: token, id: { not: user.userId } }, data: { pushToken: null, pushTokenExpiresAt: null } });
       await tx.user.update({ where: { id: user.userId }, data: { pushToken: token, pushTokenExpiresAt: expiresAt } });
     });
+    } catch { throw new ApiException(503, 'PUSH_REGISTRATION_FAILED', 'Unable to register notifications. Try again.'); }
     return { registered: true };
   }
 
   async remove(user: AuthUser, token: string) {
-    await this.prisma.user.updateMany({ where: { id: user.userId, pushToken: token, pushTokenExpiresAt: this.expiration(user) }, data: { pushToken: null, pushTokenExpiresAt: null } });
+    const expiresAt = this.expiration(user);
+    try {
+      await this.prisma.user.updateMany({ where: { id: user.userId, pushToken: token, pushTokenExpiresAt: expiresAt }, data: { pushToken: null, pushTokenExpiresAt: null } });
+    } catch { throw new ApiException(503, 'PUSH_REGISTRATION_FAILED', 'Unable to update notifications. Try again.'); }
     return { registered: false };
   }
 

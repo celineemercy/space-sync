@@ -37,8 +37,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isRestoring, setIsRestoring] = useState(true);
   const pushRegistration = useRef<{ token: string; session: string } | null>(null);
+  const sessionGeneration = useRef(0);
 
   const signOut = useCallback(async () => {
+    sessionGeneration.current += 1;
     const userId = user?.id;
     const registration = pushRegistration.current;
     pushRegistration.current = null;
@@ -63,13 +65,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!accessToken || !user || user.role === "ADMIN") return;
     let active = true;
+    const generation = sessionGeneration.current;
+    const isCurrent = () => active && generation === sessionGeneration.current;
     let pending = false;
     const register = async () => {
       if (pending) return;
       pending = true;
       try {
-        const token = await registerDecisionPush(accessToken, () => active);
-        if (token && active) pushRegistration.current = { token, session: accessToken };
+        const token = await registerDecisionPush(accessToken, isCurrent);
+        if (token && isCurrent()) pushRegistration.current = { token, session: accessToken };
         else if (token) await removeDecisionPush(accessToken, token);
       } catch { logRuntime("warn", "push_registration_failed"); }
       finally { pending = false; }
