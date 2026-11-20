@@ -8,6 +8,7 @@ import type { CreateReservationDto } from './dto/create-reservation.dto.js';
 import type { AuthUser } from '../auth/auth-user.js';
 import { DocumentsService } from './documents.service.js';
 import { reservationWithRoom, toReservationDto } from './reservation.mapper.js';
+import { campusDay, campusWeek, CAMPUS_TIME_ZONE } from '../common/campus-date.js';
 
 @Injectable()
 export class ReservationsService implements OnModuleInit, OnModuleDestroy {
@@ -177,12 +178,27 @@ export class ReservationsService implements OnModuleInit, OnModuleDestroy {
     return toReservationDto(updated);
   }
 
-  async adminList(user: AuthUser, status?: string, page?: string) {
+  async adminStats(user: AuthUser) {
+    this.admin(user);
+    const today = campusDay();
+    const week = campusWeek();
+    const [pendingToday, groups] = await Promise.all([
+      this.prisma.reservation.count({ where: { status: ReservationStatus.PENDING, startsAt: { gte: today.startsAt, lt: today.endsAt }, endsAt: { gt: new Date() } } }),
+      this.prisma.reservation.groupBy({ by: ['roomId'], where: { status: ReservationStatus.CONFIRMED, startsAt: { gte: week.startsAt, lt: week.endsAt } }, _count: { _all: true } }),
+    ]);
+    const rooms = groups.length ? await this.prisma.room.findMany({ where: { id: { in: groups.map((group) => group.roomId) } }, select: { id: true, code: true, name: true } }) : [];
+    const counts = new Map(groups.map((group) => [group.roomId, group._count._all]));
+    const ranked = rooms.map((room) => ({ ...room, bookings: counts.get(room.id) ?? 0 })).sort((a, b) => b.bookings - a.bookings || a.code.localeCompare(b.code));
+    return { timeZone: CAMPUS_TIME_ZONE, date: today.date, weekStart: week.date, pendingToday, confirmedThisWeek: groups.reduce((sum, group) => sum + group._count._all, 0), busiestRoom: ranked[0] ?? null };
+  }
+
+  async adminList(user: AuthUser, status?: string, page?: string, date?: string) {
     this.admin(user);
     const parsedPage = Number(page ?? 1);
     if (!Number.isInteger(parsedPage) || parsedPage < 1 || parsedPage > 10000) throw new ApiException(400, 'INVALID_PAGE', 'Invalid page.');
     if (status && status !== 'HISTORY' && !Object.values(ReservationStatus).includes(status as ReservationStatus)) throw new ApiException(400, 'INVALID_STATUS', 'Invalid status.');
-    const where = status === 'HISTORY' ? { status: { not: ReservationStatus.PENDING } } : status ? { status: status as ReservationStatus } : {};
+    const day = date === undefined ? undefined : campusDay(date);
+    const where = { ...(status === 'HISTORY' ? { status: { not: ReservationStatus.PENDING } } : status ? { status: status as ReservationStatus } : {}), ...(day ? { startsAt: { gte: day.startsAt, lt: day.endsAt } } : {}) };
     const [items, total] = await Promise.all([
       this.prisma.reservation.findMany({ where, include: { ...reservationWithRoom, user: { select: { id: true, email: true } } }, orderBy: { createdAt: 'desc' }, skip: (parsedPage - 1) * 20, take: 20 }),
       this.prisma.reservation.count({ where }),

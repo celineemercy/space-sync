@@ -36,8 +36,8 @@ export class ReservationsController {
   }
 
   @Get('admin')
-  adminList(@CurrentUser() user: AuthUser, @Query('status') status?: string, @Query('page') page?: string) {
-    return this.reservations.adminList(user, status, page);
+  adminList(@CurrentUser() user: AuthUser, @Query('status') status?: string, @Query('page') page?: string, @Query('date') date?: string) {
+    return this.reservations.adminList(user, status, page, date);
   }
 
   @Get('admin/:reservationId')

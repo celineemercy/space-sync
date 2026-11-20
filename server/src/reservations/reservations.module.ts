@@ -3,10 +3,11 @@ import { AuthModule } from '../auth/auth.module.js';
 import { ReservationsController } from './reservations.controller.js';
 import { ReservationsService } from './reservations.service.js';
 import { DocumentsService } from './documents.service.js';
+import { AdminController } from './admin.controller.js';
 
 @Module({
   imports: [AuthModule],
-  controllers: [ReservationsController],
+  controllers: [ReservationsController, AdminController],
   providers: [ReservationsService, DocumentsService],
 })
 export class ReservationsModule {}
