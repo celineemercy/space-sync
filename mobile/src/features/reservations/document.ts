@@ -4,7 +4,7 @@ const extensionMime: Record<string, string> = { pdf: "application/pdf", jpg: "im
 export function reservationDocumentMime(document: { name: string; mimeType?: string; size?: number }): string {
   if (document.size !== undefined && (!Number.isFinite(document.size) || document.size <= 0 || document.size > 10 * 1024 * 1024)) throw new Error(message);
   const extension = document.name.includes(".") ? document.name.split(".").pop()!.toLowerCase() : "";
-  const fromName = extensionMime[extension];
+  const fromName = Object.prototype.hasOwnProperty.call(extensionMime, extension) ? extensionMime[extension] : undefined;
   const mime = document.mimeType?.split(";")[0].trim().toLowerCase();
   if (!mime || mime === "application/octet-stream") {
     if (fromName) return fromName;
