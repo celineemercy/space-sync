@@ -159,4 +159,3 @@ Record the Git commit, EAS build ID and URL, APK checksum, device model, Android
 ### Reservation expiration
 
 Admin list and detail reads do not run expiration writes. Pending requests expire at their end time through startup maintenance and a background sweep every 60 seconds; the displayed status can therefore lag by up to one sweep. Approval/rejection still atomically requires a pending request whose end time has not passed. Slow sweeps never overlap, failures are logged, and shutdown clears the timer.
-
