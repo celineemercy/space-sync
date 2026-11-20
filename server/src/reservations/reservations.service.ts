@@ -13,6 +13,7 @@ import { reservationWithRoom, toReservationDto } from './reservation.mapper.js';
 export class ReservationsService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(ReservationsService.name);
   private maintenance?: ReturnType<typeof setInterval>;
+  private maintenanceRunning = false;
   constructor(private readonly prisma: PrismaService, private readonly documents: DocumentsService) {}
 
   onModuleInit() {
@@ -24,6 +25,9 @@ export class ReservationsService implements OnModuleInit, OnModuleDestroy {
   onModuleDestroy() { if (this.maintenance) clearInterval(this.maintenance); }
 
   private async maintain() {
+    if (this.maintenanceRunning) return;
+    this.maintenanceRunning = true;
+    try {
     await this.expirePending();
     const cutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
     const expired = await this.prisma.reservation.findMany({
@@ -36,6 +40,7 @@ export class ReservationsService implements OnModuleInit, OnModuleDestroy {
       if (item.documentKey) await this.documents.remove(item.documentKey);
       await this.prisma.reservation.update({ where: { id: item.id }, data: { documentKey: null } });
     }
+    } finally { this.maintenanceRunning = false; }
   }
 
   private async expirePending() {
@@ -174,7 +179,6 @@ export class ReservationsService implements OnModuleInit, OnModuleDestroy {
 
   async adminList(user: AuthUser, status?: string, page?: string) {
     this.admin(user);
-    await this.expirePending();
     const parsedPage = Number(page ?? 1);
     if (!Number.isInteger(parsedPage) || parsedPage < 1 || parsedPage > 10000) throw new ApiException(400, 'INVALID_PAGE', 'Invalid page.');
     if (status && status !== 'HISTORY' && !Object.values(ReservationStatus).includes(status as ReservationStatus)) throw new ApiException(400, 'INVALID_STATUS', 'Invalid status.');
@@ -188,7 +192,6 @@ export class ReservationsService implements OnModuleInit, OnModuleDestroy {
 
   async adminDetail(user: AuthUser, id: string) {
     this.admin(user);
-    await this.expirePending();
     const item = await this.prisma.reservation.findUnique({ where: { id }, include: { ...reservationWithRoom, user: { select: { id: true, email: true } } } });
     if (!item) throw new ApiException(404, 'RESERVATION_NOT_FOUND', 'The request does not exist.');
     return { ...toReservationDto(item), student: item.user };

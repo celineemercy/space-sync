@@ -155,3 +155,8 @@ The Android app writes `[space-sync]` API events to the device log. They include
 Record the test time and the corresponding app and API log lines when reporting a failure. Avoid attaching unfiltered device logs because other apps can write sensitive data there.
 
 Record the Git commit, EAS build ID and URL, APK checksum, device model, Android version, test date, API release URL, acceptance results, and known limitations. Never record passwords, JWTs, database credentials, or signing material.
+
+### Reservation expiration
+
+Admin list and detail reads do not run expiration writes. Pending requests expire at their end time through startup maintenance and a background sweep every 60 seconds; the displayed status can therefore lag by up to one sweep. Approval/rejection still atomically requires a pending request whose end time has not passed. Slow sweeps never overlap, failures are logged, and shutdown clears the timer.
+
