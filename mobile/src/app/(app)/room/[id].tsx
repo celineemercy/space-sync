@@ -1,0 +1,264 @@
+import { useLocalSearchParams, useRouter } from "expo-router";
+import * as DocumentPicker from "expo-document-picker";
+import { useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { AppButton } from "@/components/ui/app-button";
+import { ErrorState, LoadingState } from "@/components/ui/async-state";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { Screen } from "@/components/ui/screen";
+import { OfflineBanner, StatusMessage } from "@/components/ui/status-message";
+import { Colors, Radius, Spacing, Typography } from "@/constants/theme";
+import { useCreateReservation } from "@/features/reservations/queries";
+import { useRoom } from "@/features/rooms/queries";
+import {
+  useSavedRooms,
+  useSaveRoom,
+} from "@/features/saved-rooms/queries";
+import { toCampusLabel } from "@/lib/date-time";
+import { logRuntime } from "@/lib/runtime-log";
+
+function first(value: string | string[] | undefined): string {
+  return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
+}
+
+export default function RoomDetailScreen() {
+  const params = useLocalSearchParams<{
+    id: string;
+    startsAt?: string;
+    endsAt?: string;
+  }>();
+  const router = useRouter();
+  const roomId = first(params.id);
+  const startsAt = first(params.startsAt);
+  const endsAt = first(params.endsAt);
+  const roomQuery = useRoom(roomId);
+  const reservation = useCreateReservation();
+  const savedRooms = useSavedRooms();
+  const saveRoom = useSaveRoom();
+  const [dialog, setDialog] = useState<"confirm" | "success" | null>(null);
+  const [document, setDocument] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
+  const [documentError, setDocumentError] = useState<string | null>(null);
+
+  const chooseDocument = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({ type: ["application/pdf", "image/jpeg", "image/png"], multiple: false, copyToCacheDirectory: true });
+      if (result.canceled) return;
+      const selected = result.assets[0];
+      if (!selected || (selected.size ?? 0) > 10 * 1024 * 1024) {
+        setDocumentError("Choose one PDF, JPG, or PNG up to 10 MB.");
+        return;
+      }
+      setDocument(selected);
+      setDocumentError(null);
+    } catch {
+      logRuntime("warn", "document_picker_failed");
+      setDocumentError("Unable to open your files. Try again.");
+    }
+  };
+
+  const reserve = async () => {
+    if (!startsAt || !endsAt || !document) return;
+    try {
+      await reservation.mutateAsync({ roomId, startsAt, endsAt, document: { uri: document.uri, name: document.name, mimeType: document.mimeType ?? "application/octet-stream", size: document.size, file: document.file } });
+      setDialog("success");
+    } catch {
+      logRuntime("warn", "booking_failed");
+    }
+  };
+
+  if (roomQuery.isLoading) {
+    return (
+      <Screen scroll={false} style={styles.center}>
+        <LoadingState label="Loading room details..." />
+      </Screen>
+    );
+  }
+  if (roomQuery.error || !roomQuery.data) {
+    return (
+      <Screen>
+        {roomQuery.error ? (
+          <ErrorState
+            error={roomQuery.error}
+            retrying={roomQuery.isFetching}
+            onRetry={() => void roomQuery.refetch()}
+          />
+        ) : null}
+      </Screen>
+    );
+  }
+
+  const room = roomQuery.data.room;
+  const isSaved = savedRooms.data?.some((item) => item.roomId === room.id);
+
+  const saveLocally = async () => {
+    if (isSaved) {
+      router.push("/(app)/(tabs)/saved");
+      return;
+    }
+    try {
+      await saveRoom.mutateAsync({ room });
+    } catch {
+      logRuntime("warn", "saved_room_write_failed");
+    }
+  };
+
+  return (
+    <View style={styles.page}>
+      <Screen>
+        {roomQuery.data.stale ? <OfflineBanner updatedAt={roomQuery.data.updatedAt} /> : null}
+        <View style={styles.hero}>
+          <Text style={styles.code}>{room.code}</Text>
+          <Text style={styles.title}>{room.name}</Text>
+          <Text style={styles.location}>{room.location}</Text>
+        </View>
+
+        {startsAt && endsAt ? (
+          <View style={styles.bookingCard}>
+            <Text style={styles.bookingTitle}>Book this room</Text>
+            <Text style={styles.label}>Selected time</Text>
+            <Text style={styles.value}>{toCampusLabel(startsAt)}</Text>
+            <Text style={styles.to}>to</Text>
+            <Text style={styles.value}>{toCampusLabel(endsAt)}</Text>
+            <Text style={styles.label}>Permission document (required)</Text>
+            <AppButton label={document ? "Change document" : "Choose PDF or image"} variant="secondary" onPress={() => void chooseDocument()} />
+            {document ? <Text style={styles.description}>{document.name}{document.size ? ` · ${(document.size / 1024 / 1024).toFixed(1)} MB` : ""}</Text> : null}
+            {documentError ? <StatusMessage error={new Error(documentError)} /> : null}
+            {reservation.error ? (
+              <StatusMessage error={reservation.error} />
+            ) : null}
+            <AppButton
+              label="Book room"
+              disabled={!document}
+              loading={reservation.isPending}
+              onPress={() => {
+                reservation.reset();
+                setDialog("confirm");
+              }}
+            />
+          </View>
+        ) : (
+          <View style={styles.notice}>
+            <Text style={styles.noticeText}>
+              Choose a date and time from Search before reserving this room.
+            </Text>
+            <AppButton
+              label="Back to search"
+              variant="secondary"
+              onPress={() => router.back()}
+            />
+          </View>
+        )}
+
+        <View style={styles.card}>
+          <Text style={styles.label}>Capacity</Text>
+          <Text style={styles.value}>{room.capacity} people</Text>
+          <Text style={styles.label}>About this room</Text>
+          <Text style={styles.description}>
+            {room.description ?? "No description is available."}
+          </Text>
+          <Text style={styles.label}>Facilities</Text>
+          <View style={styles.chips} accessible accessibilityLabel={`Facilities: ${room.facilities.map((facility) => facility.name).join(", ") || "none"}`}>
+            {room.facilities.map((facility) => (
+              <Text key={facility.id} style={styles.chip}>
+                {facility.name}
+              </Text>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.savedCard}>
+          <Text style={styles.savedTitle}>Keep for later</Text>
+          {savedRooms.error ? <StatusMessage error={savedRooms.error} /> : null}
+          {saveRoom.error ? <StatusMessage error={saveRoom.error} /> : null}
+          <AppButton
+            disabled={savedRooms.isLoading}
+            label={isSaved ? "View saved rooms" : "Save room locally"}
+            loading={saveRoom.isPending}
+            onPress={saveLocally}
+            variant="secondary"
+          />
+        </View>
+      </Screen>
+      <ConfirmationDialog
+        visible={dialog !== null}
+        title={dialog === "success" ? "Request submitted" : "Request this room?"}
+        description={
+          dialog === "success"
+            ? `${room.name} is waiting for admin approval. The time slot is held while your request is pending.`
+            : startsAt && endsAt
+              ? `${room.name} will be reserved from ${toCampusLabel(startsAt)} until ${toCampusLabel(endsAt)}.`
+              : "Return to Search and choose a valid time before reserving."
+        }
+        confirmLabel={
+          dialog === "success" ? "View requests" : "Submit request"
+        }
+        cancelLabel={dialog === "success" ? "Stay here" : "Review details"}
+        loading={reservation.isPending}
+        error={dialog === "success" ? null : reservation.error}
+        onClose={() => setDialog(null)}
+        onConfirm={
+          dialog === "success"
+            ? () => router.replace("/(app)/(tabs)/reservations")
+            : reserve
+        }
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  page: { flex: 1, backgroundColor: Colors.background },
+  center: { alignItems: "center", justifyContent: "center" },
+  hero: { gap: Spacing.xs },
+  code: { ...Typography.overline, color: Colors.primary },
+  title: { ...Typography.display, color: Colors.text },
+  location: { ...Typography.body, color: Colors.textMuted },
+  card: {
+    backgroundColor: Colors.surface,
+    padding: Spacing.lg,
+    borderRadius: Radius.lg,
+    gap: Spacing.sm,
+  },
+  label: {
+    color: Colors.textMuted,
+    ...Typography.label,
+    marginTop: Spacing.sm,
+  },
+  value: { ...Typography.title, color: Colors.text },
+  description: { ...Typography.body, color: Colors.text },
+  chips: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.sm },
+  chip: {
+    backgroundColor: Colors.surfaceMuted,
+    color: Colors.text,
+    padding: Spacing.sm,
+    borderRadius: Radius.pill,
+    ...Typography.caption,
+  },
+  bookingCard: {
+    backgroundColor: Colors.successSurface,
+    padding: Spacing.lg,
+    borderRadius: Radius.lg,
+    gap: Spacing.sm,
+  },
+  savedCard: {
+    backgroundColor: Colors.surface,
+    borderColor: Colors.border,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    gap: Spacing.md,
+    padding: Spacing.lg,
+  },
+  savedTitle: { ...Typography.title, color: Colors.primary },
+  bookingTitle: {
+    color: Colors.primary,
+    ...Typography.title,
+  },
+  to: { ...Typography.body, color: Colors.textMuted },
+  notice: {
+    backgroundColor: Colors.warningSurface,
+    padding: Spacing.lg,
+    borderRadius: Radius.lg,
+    gap: Spacing.md,
+  },
+  noticeText: { ...Typography.body, color: Colors.warning },
+});

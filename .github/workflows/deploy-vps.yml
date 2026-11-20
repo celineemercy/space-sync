@@ -1,0 +1,94 @@
+name: Deploy VPS
+
+on:
+  workflow_call:
+    inputs:
+      target_sha:
+        required: false
+        type: string
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: space-sync-vps-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-24.04
+    environment:
+      name: vps-production
+      url: https://${{ vars.VPS_API_DOMAIN }}/api/v1/health
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_APP_PATH: ${{ secrets.VPS_APP_PATH }}
+      VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+      VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+      VPS_API_DOMAIN: ${{ vars.VPS_API_DOMAIN }}
+      TARGET_SHA: ${{ inputs.target_sha || github.sha }}
+    steps:
+      - name: Validate deployment secrets
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for name in VPS_HOST VPS_USER VPS_APP_PATH VPS_SSH_PRIVATE_KEY VPS_KNOWN_HOSTS VPS_API_DOMAIN; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "Missing required vps-production secret or variable: ${name}" >&2
+              exit 1
+            fi
+          done
+          [[ "${TARGET_SHA}" =~ ^[0-9a-f]{40}$ ]] || { echo 'Invalid target commit SHA.' >&2; exit 1; }
+
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -m 0700 -d ~/.ssh
+          printf '%s\n' "${VPS_SSH_PRIVATE_KEY}" > ~/.ssh/space_sync_deploy
+          chmod 0600 ~/.ssh/space_sync_deploy
+          printf '%s\n' "${VPS_KNOWN_HOSTS}" > ~/.ssh/known_hosts
+          chmod 0644 ~/.ssh/known_hosts
+
+      - name: Deploy tested dev commit
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh \
+            -i ~/.ssh/space_sync_deploy \
+            -o BatchMode=yes \
+            "${VPS_USER}@${VPS_HOST}" \
+            bash -s -- "${VPS_APP_PATH}" "${TARGET_SHA}" <<'REMOTE_SCRIPT'
+          set -Eeuo pipefail
+          app_path="$1"
+          target_sha="$2"
+          cd "${app_path}"
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo 'Refusing to deploy over a dirty VPS working tree.' >&2
+            exit 1
+          fi
+          git fetch --no-tags origin refs/heads/dev:refs/remotes/origin/dev
+          if [[ "$(git rev-parse origin/dev)" != "${target_sha}" ]]; then
+            echo 'The dev branch moved after this workflow started; refusing to deploy a different commit.' >&2
+            exit 1
+          fi
+          git switch dev
+          git merge --ff-only "${target_sha}"
+          [[ "$(git rev-parse HEAD)" == "${target_sha}" ]]
+          ./deploy/scripts/deploy.sh
+          REMOTE_SCRIPT
+
+      - name: Confirm public health endpoint
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            --retry 5 \
+            --retry-delay 3 \
+            "https://${VPS_API_DOMAIN}/api/v1/health"
