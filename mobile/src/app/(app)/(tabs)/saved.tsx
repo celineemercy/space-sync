@@ -147,7 +147,7 @@ export default function SavedRoomsScreen() {
                   </View>
                   <View style={styles.actions}>
                     <AppButton
-                      label="Edit note"
+                      label={savedRoom.note ? "Edit note" : "Add note"}
                       onPress={() => startEditing(savedRoom)}
                       style={styles.action}
                       variant="secondary"

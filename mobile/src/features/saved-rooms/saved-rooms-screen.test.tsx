@@ -118,6 +118,16 @@ it("updates a personal note", async () => {
   });
 });
 
+it("offers Add note and the 200-character editor for a room without a note", async () => {
+  mockSavedRoomsQuery.data = [{ ...savedRoom, note: "" }];
+  const screen = await render(<SavedRoomsScreen />);
+  await fireEvent.press(screen.getByLabelText("Add note"));
+  expect(screen.getByLabelText("Note for Campus Room").props.maxLength).toBe(200);
+  await fireEvent.changeText(screen.getByLabelText("Note for Campus Room"), "Bring an adapter");
+  await fireEvent.press(screen.getByLabelText("Save changes"));
+  expect(mockUpdate.mutateAsync).toHaveBeenCalledWith({ id: savedRoom.id, note: "Bring an adapter" });
+});
+
 it("deletes a saved room after confirmation", async () => {
   const screen = await render(<SavedRoomsScreen />);
 
