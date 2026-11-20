@@ -1,4 +1,5 @@
 import { apiRequest } from "@/lib/api";
+import { reservationDocumentMime } from "./document";
 import {
   cacheReservations,
   getCachedReservations,
@@ -37,11 +38,12 @@ export const reservationsRepository: ReservationsRepository = {
   fetchMine: (accessToken) =>
     apiRequest<Reservation[]>("/reservations/mine", {}, accessToken),
   create: (input, accessToken) => {
+    const mimeType = reservationDocumentMime(input.document);
     const body = new FormData();
     body.append("roomId", input.roomId);
     body.append("startsAt", input.startsAt);
     body.append("endsAt", input.endsAt);
-    body.append("document", input.document.file ?? ({ uri: input.document.uri, name: input.document.name, type: input.document.mimeType } as unknown as Blob));
+    body.append("document", input.document.file ?? ({ uri: input.document.uri, name: input.document.name, type: mimeType } as unknown as Blob));
     return apiRequest<Reservation>("/reservations", { method: "POST", body }, accessToken);
   },
   cancel: (reservationId, accessToken) =>
