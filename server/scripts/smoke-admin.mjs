@@ -29,6 +29,15 @@ try {
   const login = await request('/auth/login', null, { method: 'POST', body: JSON.stringify({ email, password }) });
   assert(login.status === 201, 'Admin login failed');
   const token = login.body.accessToken;
+  await db.query('INSERT INTO "ClassSchedule" ("id","roomId","title","startsAt","endsAt","updatedAt") VALUES ($1,$2,$3,$4,$5,NOW())', [randomUUID(), roomId, 'Private lecture title', new Date(weekStart.getTime()+10_800_000).toISOString(), new Date(weekStart.getTime()+14_400_000).toISOString()]);
+  const schedule = await request(`/rooms/${roomId}/schedule?date=${week.toISOString().slice(0, 10)}`, token);
+  assert(schedule.status === 200 && schedule.body.items.length === 4, 'Daily schedule did not combine classes and confirmed bookings');
+  assert(schedule.body.items.filter(item => item.kind === 'class').length === 1 && schedule.body.items.filter(item => item.kind === 'reservation').length === 3, 'Schedule leaked pending reservations or omitted classes');
+  assert(!JSON.stringify(schedule.body).includes(email) && !JSON.stringify(schedule.body).includes('Private lecture title'), 'Schedule exposed personal information');
+  const invalidScheduleDate = await request(`/rooms/${roomId}/schedule?date=2026-02-30`, token);
+  assert(invalidScheduleDate.status === 400, 'Schedule accepted an impossible date');
+  const missingSchedule = await request('/rooms/missing-room/schedule?date=2026-11-20', token);
+  assert(missingSchedule.status === 404, 'Schedule did not reject a missing room');
   const stats = await request('/admin/stats', token);
   assert(stats.status === 200 && stats.body.pendingToday >= 1 && stats.body.confirmedThisWeek >= 3 && stats.body.busiestRoom.id === roomId, 'Dashboard aggregate mismatch');
   const filtered = await request(`/reservations/admin?status=PENDING&date=${today}`, token);
@@ -41,7 +50,7 @@ try {
   assert(approved.status === 200 && approved.body.status === 'CONFIRMED', 'Inline approval API failed');
   const anonymous = await request('/admin/stats');
   assert(anonymous.status === 401, 'Anonymous stats access allowed');
-  console.log('Admin smoke passed: stats, date/status filters, invalid dates, approval, required rejection reason, authentication.');
+  console.log('Admin/schedule smoke passed: stats, filters, decisions, authentication, daily schedules and privacy.');
 } finally {
   await db.query('DELETE FROM "Reservation" WHERE "roomId"=$1', [roomId]);
   await db.query('DELETE FROM "Room" WHERE "id"=$1', [roomId]);

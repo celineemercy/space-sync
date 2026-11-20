@@ -17,6 +17,7 @@ import {
 } from "@/features/saved-rooms/queries";
 import { toCampusLabel } from "@/lib/date-time";
 import { logRuntime } from "@/lib/runtime-log";
+import { RoomScheduleSection } from "@/features/rooms/room-schedule";
 
 function first(value: string | string[] | undefined): string {
   return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
@@ -184,6 +185,7 @@ export default function RoomDetailScreen() {
             variant="secondary"
           />
         </View>
+        <RoomScheduleSection roomId={roomId} />
       </Screen>
       <ConfirmationDialog
         visible={dialog !== null}

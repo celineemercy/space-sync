@@ -34,3 +34,14 @@ it("enforces the note length before writing to native storage", async () => {
   const storage = jest.requireActual<typeof import("./storage")>("./storage");
   expect((await storage.readSavedRooms("b"))[0].note).toHaveLength(200);
 });
+
+it("persists room schedule cache data through a native storage reload", async () => {
+  const storage = jest.requireActual<typeof import("@/storage/database")>("@/storage/database");
+  await storage.initializeDatabase();
+  const schedule = { date: "2030-01-01", timeZone: "Asia/Jakarta", items: [] };
+  await storage.cacheRoomSchedule("room", schedule.date, schedule, "2030-01-01T00:00:00Z");
+  jest.resetModules();
+  const reloaded = jest.requireActual<typeof import("@/storage/database")>("@/storage/database");
+  expect(await reloaded.getCachedRoomSchedule("room", schedule.date)).toEqual({ schedule, updatedAt: "2030-01-01T00:00:00Z" });
+  expect(await reloaded.getCachedRoomSchedule("other-room", schedule.date)).toBeNull();
+});

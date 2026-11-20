@@ -88,3 +88,13 @@ it("keeps CRUD data after the storage module is reloaded", async () => {
   await storageAfterRefresh.removeSavedRoom("student-a", created.id);
   expect(await storageAfterRefresh.readSavedRooms("student-a")).toEqual([]);
 });
+
+it("persists room schedule cache entries by room and date on web", async () => {
+  const storage = jest.requireActual<typeof import("@/storage/database.web")>("@/storage/database.web");
+  const schedule = { date: "2030-01-01", timeZone: "Asia/Jakarta", items: [] };
+  await storage.cacheRoomSchedule("room", schedule.date, schedule, "2030-01-01T00:00:00Z");
+  jest.resetModules();
+  const reloaded = jest.requireActual<typeof import("@/storage/database.web")>("@/storage/database.web");
+  expect(await reloaded.getCachedRoomSchedule("room", schedule.date)).toEqual({ schedule, updatedAt: "2030-01-01T00:00:00Z" });
+  expect(await reloaded.getCachedRoomSchedule("room", "2030-01-02")).toBeNull();
+});
