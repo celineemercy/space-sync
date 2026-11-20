@@ -5,6 +5,7 @@ import { apiRequest } from "@/lib/api";
 import { clearSession } from "@/storage/session";
 import { clearReminders } from "@/features/reminders/reminders";
 import { clearCachedAvailability, clearCachedReservations } from "@/storage/database";
+import { registerDecisionPush, removeDecisionPush } from "@/features/notifications/decision-push";
 
 const mockClear = jest.fn();
 jest.mock("@tanstack/react-query", () => ({ useQueryClient: () => ({ clear: mockClear }) }));
@@ -13,6 +14,7 @@ jest.mock("@/storage/session", () => ({
   saveSession: jest.fn(), clearSession: jest.fn().mockResolvedValue(undefined),
 }));
 jest.mock("@/features/reminders/reminders", () => ({ clearReminders: jest.fn().mockResolvedValue(undefined) }));
+jest.mock("@/features/notifications/decision-push", () => ({ registerDecisionPush: jest.fn().mockResolvedValue(null), removeDecisionPush: jest.fn(), watchDecisionPushTokens: () => () => {} }));
 jest.mock("@/storage/database", () => ({
   initializeDatabase: jest.fn().mockResolvedValue(undefined),
   clearCachedAvailability: jest.fn().mockResolvedValue(undefined), clearCachedReservations: jest.fn().mockResolvedValue(undefined),
@@ -47,5 +49,23 @@ it("cleans up manual logout before switching accounts", async () => {
   await fireEvent.press(screen.getByLabelText("login B"));
   await waitFor(() => expect(screen.getByText("b@example.test")).toBeTruthy());
   expect(mockClear).toHaveBeenCalledTimes(1);
+});
+
+it("deregisters the current device token on logout", async () => {
+  jest.mocked(registerDecisionPush).mockResolvedValueOnce("ExponentPushToken[test]");
+  const screen = await render(<AuthProvider><Session /></AuthProvider>);
+  await waitFor(() => expect(screen.getByText("a@example.test")).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText("logout"));
+  await waitFor(() => expect(removeDecisionPush).toHaveBeenCalledWith("expired", "ExponentPushToken[test]"));
+});
+
+it("removes a registration that finishes after logout", async () => {
+  let finish!: (token: string) => void;
+  jest.mocked(registerDecisionPush).mockReturnValueOnce(new Promise((resolve) => { finish = resolve; }));
+  const screen = await render(<AuthProvider><Session /></AuthProvider>);
+  await waitFor(() => expect(screen.getByText("a@example.test")).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText("logout"));
+  await act(async () => finish("ExponentPushToken[late]"));
+  await waitFor(() => expect(removeDecisionPush).toHaveBeenCalledWith("expired", "ExponentPushToken[late]"));
 });
 

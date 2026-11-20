@@ -69,6 +69,7 @@ jobs:
             if curl --fail --silent http://localhost:3000/api/v1/health > /dev/null; then
               npm run test:smoke
               node scripts/smoke-admin.mjs
+              node scripts/smoke-push-registration.mjs
               exit 0
             fi
             if [[ "${attempt}" -lt 30 ]]; then sleep 1; fi

@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit, Optional } from '@nestjs/common';
 import { ApiException } from '../common/api-exception.js';
 import { parseTimeRange } from '../common/time-range.js';
 import { activeReservationOverlap } from '../common/active-reservation-overlap.js';
@@ -9,13 +9,14 @@ import type { AuthUser } from '../auth/auth-user.js';
 import { DocumentsService } from './documents.service.js';
 import { reservationWithRoom, toReservationDto } from './reservation.mapper.js';
 import { campusDay, campusWeek, CAMPUS_TIME_ZONE } from '../common/campus-date.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 
 @Injectable()
 export class ReservationsService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(ReservationsService.name);
   private maintenance?: ReturnType<typeof setInterval>;
   private maintenanceRunning = false;
-  constructor(private readonly prisma: PrismaService, private readonly documents: DocumentsService) {}
+  constructor(private readonly prisma: PrismaService, private readonly documents: DocumentsService, @Optional() private readonly notifications?: NotificationsService) {}
 
   onModuleInit() {
     void this.maintain().catch(() => this.logger.error('Reservation maintenance failed.'));
@@ -217,7 +218,7 @@ export class ReservationsService implements OnModuleInit, OnModuleDestroy {
     this.admin(user);
     const trimmed = reason?.trim();
     if (status === 'REJECTED' && (!trimmed || trimmed.length > 500)) throw new ApiException(400, 'REASON_REQUIRED', 'Enter a rejection reason up to 500 characters.');
-    return this.prisma.$transaction(async (transaction) => {
+    const result = await this.prisma.$transaction(async (transaction) => {
       const request = await transaction.reservation.findUnique({ where: { id }, select: { roomId: true } });
       if (!request) throw new ApiException(409, 'REQUEST_ALREADY_DECIDED', 'This request is no longer pending.');
       await transaction.$queryRaw`SELECT "id" FROM "Room" WHERE "id" = ${request.roomId} FOR UPDATE`;
@@ -230,6 +231,9 @@ export class ReservationsService implements OnModuleInit, OnModuleDestroy {
       const item = await transaction.reservation.findUniqueOrThrow({ where: { id }, include: reservationWithRoom });
       return toReservationDto(item);
     });
+    // Notification failures must never roll back a committed reservation decision.
+    if (this.notifications) void this.notifications.decision(id).catch(() => this.logger.error('Decision push failed.'));
+    return result;
   }
 
   async document(user: AuthUser, id: string) {
