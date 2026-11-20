@@ -210,15 +210,6 @@ export default function SearchScreen() {
           {validationError ? (
             <StatusMessage error={new Error(validationError)} />
           ) : null}
-          {availability.error ? (
-            <ErrorState
-              error={availability.error}
-              retrying={availability.isPending}
-              onRetry={() => {
-                if (searchedInput) availability.mutate(searchedInput);
-              }}
-            />
-          ) : null}
           <AppButton
             label="Search availability"
             loading={availability.isPending}
@@ -277,9 +268,9 @@ export default function SearchScreen() {
           </Text>
         </View>
 
-        {roomsQuery.isLoading ? (
+        {!searchedInput && roomsQuery.isLoading ? (
           <LoadingState label="Loading campus rooms..." />
-        ) : roomsQuery.error && !roomsQuery.data ? (
+        ) : !searchedInput && roomsQuery.error && !roomsQuery.data ? (
           <ErrorState
             error={roomsQuery.error}
             retrying={roomsQuery.isFetching}
@@ -287,7 +278,13 @@ export default function SearchScreen() {
           />
         ) : searchedInput && availability.isPending ? (
           <LoadingState label="Searching available rooms..." />
-        ) : searchedInput && availability.error ? null : visibleRooms.length === 0 ? (
+        ) : searchedInput && availability.error ? (
+          <ErrorState
+            error={new Error("Could not search availability. Check your connection and try again.")}
+            retrying={availability.isPending}
+            onRetry={() => availability.mutate(searchedInput)}
+          />
+        ) : visibleRooms.length === 0 ? (
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>No rooms found</Text>
             <Text style={styles.emptyText}>
